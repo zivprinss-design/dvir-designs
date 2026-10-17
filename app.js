@@ -24,7 +24,8 @@ async function fetchCatalog(){
         const order={pillows:0,curtains:1,tables:2};
         const group=(order[a.category]??99)-(order[b.category]??99);
         const number=p=>Number(String(p.key).match(/\d+/)?.[0]??999999);
-        return group || number(a)-number(b);
+        const position=p=>p.sortOrder!=null&&Number.isFinite(Number(p.sortOrder))?Number(p.sortOrder):number(p);
+        return group || position(a)-position(b) || number(a)-number(b);
       });
     }catch(error){
       catalogUsingBackup=true;
@@ -122,7 +123,12 @@ function filtered(){let result=PRODUCTS.filter(p=>category==='all'||p.category==
   }
   return result;
 }
-function picture(p){return html(p.localImage||p.image||'')}
+function productImages(p){
+  const primary=String(p?.localImage||p?.image||'').trim();
+  const additional=Array.isArray(p?.images)?p.images:[];
+  return [...new Set([primary,...additional].filter(value=>typeof value==='string'&&/^(assets\/|https:\/\/)/.test(value.trim())).map(value=>value.trim()))];
+}
+function picture(p){return html(productImages(p)[0]||'')}
 function stockText(p,s){const n=p.stock?.[s];return n==null?'מלאי: יש לאמת מול העסק':`מלאי: ${Number(n)} ${html(p.unit||'יח׳')}`}
 function itemCaption(p){if(p.category==='pillows')return 'P-'+String(p.id).padStart(3,'0');if(p.label)return html(p.label);return html(p.title)}
 function renderCard(p,imagePriority=99){
@@ -361,22 +367,46 @@ function hydrateCleanImages(container){
   });
 }
 const zoomDialog=$('image-lightbox');
-let zoomOrigin=null;
+let zoomOrigin=null,zoomImages=[],zoomIndex=0,zoomProduct=null;
+async function renderZoomImage(){
+  if(!zoomProduct||!zoomImages.length)return;
+  const image=$('zoom-image'),index=zoomIndex,key=zoomProduct.key;
+  image.src=zoomImages[index];
+  image.alt=(zoomProduct.title||'מוצר')+' · תמונה '+(index+1);
+  $('zoom-prev').hidden=$('zoom-next').hidden=zoomImages.length<2;
+  $('zoom-counter').textContent=zoomImages.length>1?'תמונה '+(index+1)+' מתוך '+zoomImages.length:'';
+  if(index===0){
+    const cleaned=await cleanProductImage(zoomProduct);
+    if(zoomDialog.open&&zoomProduct?.key===key&&zoomIndex===index)image.src=cleaned;
+  }
+}
+function moveZoom(delta){
+  if(zoomImages.length<2)return;
+  zoomIndex=(zoomIndex+delta+zoomImages.length)%zoomImages.length;
+  renderZoomImage();
+}
 async function openZoom(key){
-  const p=byKey.get(key),src=p?.localImage||p?.image;
-  if(!src||zoomDialog.open)return;
-  zoomOrigin=document.activeElement;
-  const view=$('zoom-image');view.dataset.productKey=key;view.src=src;
-  view.alt=p.title||'תמונת מוצר';
+  const p=byKey.get(key),images=productImages(p);
+  if(!p||!images.length||zoomDialog.open)return;
+  zoomOrigin=document.activeElement;zoomProduct=p;zoomImages=images;zoomIndex=0;
   $('zoom-caption').textContent=p.title||'תמונת מוצר';
-  zoomDialog.showModal();$('zoom-close').focus();
-  const cleaned=await cleanProductImage(p);
-  if(zoomDialog.open&&view.dataset.productKey===key)view.src=cleaned;
+  zoomDialog.showModal();
+  renderZoomImage();
+  $('zoom-close').focus();
 }
 function closeZoom(){if(zoomDialog.open)zoomDialog.close()}
+$('zoom-prev').addEventListener('click',()=>moveZoom(-1));
+$('zoom-next').addEventListener('click',()=>moveZoom(1));
+document.addEventListener('keydown',e=>{
+  if(!zoomDialog.open)return;
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+    e.preventDefault();moveZoom(e.key==='ArrowLeft'?-1:1);
+  }
+});
 $('zoom-close').addEventListener('click',closeZoom);
 zoomDialog.addEventListener('click',e=>{if(e.target===zoomDialog)closeZoom()});
 zoomDialog.addEventListener('close',()=>{
+  zoomProduct=null;zoomImages=[];zoomIndex=0;
   $('zoom-image').removeAttribute('src');
   if(zoomOrigin?.isConnected)zoomOrigin.focus({preventScroll:true});
   zoomOrigin=null;
@@ -443,13 +473,32 @@ $('share-cart').addEventListener('click',async()=>{
   const ok=await copy(url.href);
   toast(ok?'הקישור לסל נוצר והועתק':'הקישור מוכן להעתקה');
 });
+const sharePreview=$('share-preview-dialog');
 $('whatsapp-share').addEventListener('click',()=>{
-  if(!count())return;
-  const name=requireCustomerName();if(!name)return;
-  if(location.protocol==='file:'||location.protocol==='about:'){toast('שיתוף WhatsApp זמין באתר שפורסם');return;}
+  if(!count()||!requireCustomerName())return;
+  $('share-preview-text').textContent=cartDescription();
+  sharePreview.showModal();
+  $('share-preview-send').focus();
+});
+function closeSharePreview(){if(sharePreview.open)sharePreview.close()}
+$('share-preview-close').addEventListener('click',closeSharePreview);
+$('share-preview-back').addEventListener('click',closeSharePreview);
+sharePreview.addEventListener('click',e=>{if(e.target===sharePreview)closeSharePreview()});
+sharePreview.addEventListener('close',()=>{
+  if($('whatsapp-share').isConnected)$('whatsapp-share').focus({preventScroll:true});
+});
+$('share-preview-send').addEventListener('click',()=>{
+  if(!count()||!requireCustomerName())return;
+  if(location.protocol==='file:'||location.protocol==='about:'){
+    toast('שיתוף WhatsApp זמין באתר שפורסם');return;
+  }
   const url=createCartShareUrl();
-  const message='DVIR DESIGNS — סל מוצרים\nשם הלקוח: '+name+'\nלצפייה בסל ובכמויות: '+url.href;
-  window.open('https://wa.me/?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
+  const full=cartDescription()+'\n\nלצפייה בסל באתר: '+url.href;
+  const short='DVIR DESIGNS — בקשת הצעת מחיר\nשם הלקוח: '+customerName()
+    +'\nדגמים בסל: '+new Set(cartRows().map(({p})=>p.key)).size
+    +'\nלצפייה בפריטים ובכמויות: '+url.href;
+  window.open('https://wa.me/?text='+encodeURIComponent(full.length<=3300?full:short),'_blank','noopener,noreferrer');
+  closeSharePreview();
 });
 $('copy-share-link').addEventListener('click',async()=>{
   const link=$('share-link-input').value;if(!link)return;
