@@ -100,3 +100,37 @@ html[data-theme="dark"] body.admin-page .err{color:#ff9eaa}
 html[data-theme="dark"] body.admin-page .theme-toggle{background:#3a3037;color:#f7eff0;border-color:#8c717c}
 html[data-theme="dark"] body.admin-page .theme-toggle:hover{background:#4b3944}
 @media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}
+
+/* Persistent header and home navigation — desktop and mobile */
+.site-header{position:sticky;top:0;z-index:24}
+.home-nav-button{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:44px;padding:8px 13px;border:1px solid #bc9993;border-radius:11px;background:#ffffff55;color:#382e2d;font:500 14px/1.2 'Assistant',Arial,sans-serif;white-space:nowrap;transition:background-color .2s,border-color .2s,color .2s}
+.home-nav-button:hover{background:#fff8f5}
+.home-nav-button:focus-visible{outline:3px solid #a87974;outline-offset:3px}
+.home-nav-button svg{width:20px;height:20px;flex:none}
+html[data-theme="dark"] .home-nav-button{background:#3a3037;color:#f7eff0;border-color:#8c717c}
+html[data-theme="dark"] .home-nav-button:hover{background:#4b3944}
+@media(min-width:741px){
+  html{scroll-padding-top:108px}
+  .site-header{box-shadow:0 3px 16px #65514a18}
+  .header-inner{min-height:96px;padding-block:8px}
+  .wordmark img{max-height:82px}
+}
+@media(min-width:701px) and (max-width:1100px){
+  .theme-toggle .theme-label,.home-nav-button .home-nav-label{display:none}
+  .home-nav-button,.theme-toggle{width:44px;min-width:44px;padding:8px}
+  .nav-right{gap:8px}
+}
+@media(max-width:700px){
+  .header-inner{grid-template-columns:minmax(82px,1fr) minmax(104px,220px) minmax(82px,1fr);gap:3px;padding-inline:8px}
+  .nav-right{gap:2px}
+  .home-nav-button,.theme-toggle{width:39px;min-width:39px;height:42px;min-height:42px;padding:7px;gap:0}
+  .home-nav-label{display:none}
+  .home-nav-button svg,.theme-toggle svg{width:19px;height:19px}
+}
+@media(max-width:355px){
+  .header-inner{grid-template-columns:minmax(80px,1fr) minmax(100px,1.5fr) minmax(80px,1fr);gap:2px;padding-inline:7px}
+  .nav-right{gap:1px}
+  .home-nav-button,.theme-toggle{min-width:38px;width:38px;padding:6px}
+  .wordmark img{max-height:58px}
+}
+@media(prefers-reduced-motion:reduce){.home-nav-button{transition:none}}
