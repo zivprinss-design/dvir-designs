@@ -156,3 +156,12 @@ test('Optional phone may be empty and admin inbox UI renders securely', async ({
   await expect(page.locator('#inbox-detail')).toContainText('לקוח ללא טלפון');
   await expect(page.locator('#inbox-detail')).toContainText('הלקוח לא הזין מספר טלפון');
 });
+
+test('Old long cart links continue to open', async ({ page })=>{
+  const legacy=Buffer.from(JSON.stringify([3,[['p1','45×45',1,null]],'לקוח ישן']),'utf8').toString('base64url');
+  await page.goto('/?cart='+encodeURIComponent(legacy)+'#all');
+  await expect(page.locator('#cart-panel')).toHaveClass(/is-open/);
+  await expect(page.locator('#customer-name')).toHaveValue('לקוח ישן');
+  await expect(page.locator('#customer-phone')).toHaveValue('');
+  await expect(page.locator('#cart-list .cart-line')).toHaveCount(1);
+});
