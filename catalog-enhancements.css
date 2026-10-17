@@ -57,3 +57,32 @@
 .back-to-top svg{width:22px;height:22px}
 @media(max-width:700px){.back-to-top{display:none!important}.product-card{contain-intrinsic-size:auto 390px}}
 @media(prefers-reduced-motion:reduce){.back-to-top{transition:none}}
+
+/* Product imagery and mobile polish 2026 — preserve each original textile. */
+.product-photo{position:relative}
+.product-gallery-count{position:absolute;top:8px;left:8px;z-index:1;pointer-events:none;background:#fff9f3ed;color:#53413d;border:1px solid #d8c5bd;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:600;box-shadow:0 2px 8px #3c27221c}
+.product-card[data-category="curtains"] .product-photo{background:#f6f2ee}
+.product-card[data-category="curtains"] .product-photo-trigger img{object-fit:contain}
+.product-card[data-category="tables"] .product-photo-trigger img{object-position:center center}
+.product-card .product-add:focus-visible,.cart-panel button:focus-visible{outline:3px solid #ac777b;outline-offset:3px}
+@media(max-width:700px){
+  .products-grid{gap:20px 12px}
+  .product-card{content-visibility:auto}
+  .product-photo{border-radius:12px}
+  .product-gallery-count{font-size:10px;left:5px;top:5px;padding:3px 6px}
+  .product-card .product-add{min-height:44px;font-weight:600}
+  .cart-panel .quantity-row button{min-width:44px;min-height:44px}
+  .cart-line{grid-template-columns:76px minmax(0,1fr)}
+  .cart-line .cart-photo-trigger,.cart-line .cart-photo-trigger img{width:74px;height:74px}
+  .cart-line .quantity-row{gap:7px}
+}
+@media(max-width:390px){
+  .products-grid{gap:18px 9px}
+  .product-title{line-height:1.35;overflow-wrap:anywhere}
+  .cart-line{grid-template-columns:64px minmax(0,1fr);gap:10px}
+  .cart-line .cart-photo-trigger,.cart-line .cart-photo-trigger img{width:62px;height:62px}
+  .cart-product-details strong{overflow-wrap:anywhere}
+  .cart-primary-actions{gap:8px}
+}
+html[data-theme="dark"] .product-gallery-count{background:#342b34ed;color:#f6edf0;border-color:#7d6771}
+html[data-theme="dark"] .product-card[data-category="curtains"] .product-photo{background:#2b252b}
