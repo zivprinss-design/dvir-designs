@@ -75,6 +75,11 @@ test('Studio design preview and local photo cropping do not require publishing t
   await page.locator('[name="lightHeader"]').fill('#dac4c7');
   await expect(page.locator('[name="lightHeader"]')).toHaveValue('#dac4c7');
   await expect.poll(async () => page.frameLocator('#studio-preview-frame').locator('.site-header').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(218, 196, 199)');
+  await expect(page.locator('[name="logoUrl"]')).toHaveValue('assets/logo.png');
+  await page.locator('[name="homeTitle"]').fill('קולקציות מעוצבות');
+  await expect(page.frameLocator('#studio-preview-frame').locator('#home-heading')).toHaveText('קולקציות מעוצבות');
+  await page.locator('[name="homePillowsImage"]').fill('assets/home-curtains.jpg');
+  await expect(page.frameLocator('#studio-preview-frame').locator('.category-tile[data-nav="pillows"] img')).toHaveAttribute('src','assets/home-curtains.jpg');
   await page.locator('#studio-mobile-view').click();
   await expect(page.locator('#studio-preview-shell')).toHaveClass(/mobile/);
   await page.locator('[data-studio-tab="photos"]').click();
