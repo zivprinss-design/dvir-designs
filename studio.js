@@ -56,6 +56,15 @@ function decorateInputs(){
  });
  for(const b of form.querySelectorAll('[data-design-preset]'))b.classList.remove('active');
 }
+function sizePreview(){
+ const shell=$('studio-preview-shell'),mobile=shell.classList.contains('mobile');
+ const width=mobile?390:1280,height=mobile?844:900;
+ const scale=Math.min(1,Math.max(160,shell.clientWidth-20)/width);
+ shell.style.setProperty('--studio-frame-width',width+'px');
+ shell.style.setProperty('--studio-frame-height',height+'px');
+ shell.style.setProperty('--studio-frame-scale',String(scale));
+ shell.style.height=Math.ceil(height*scale+20)+'px';
+}
 function sendPreview(){
  if(!$('studio-pane-design').hidden&&frameReady){
   const frame=$('studio-preview-frame');
@@ -72,13 +81,16 @@ form.querySelectorAll('[data-design-preset]').forEach(button=>button.addEventLis
  formDirty=true;button.classList.add('active');
  status('ערכת העיצוב נטענה לתצוגה מקדימה. כדי לפרסם לחץ על ״שמירה ופרסום באתר״.',true);
 }));
-$('studio-preview-frame').addEventListener('load',()=>{frameReady=true;sendPreview()});
+$('studio-preview-frame').addEventListener('load',()=>{frameReady=true;sizePreview();sendPreview()});
+if(typeof ResizeObserver==='function')new ResizeObserver(sizePreview).observe($('studio-preview-shell'));
+window.addEventListener('resize',sizePreview);
+sizePreview();
 $('studio-desktop-view').addEventListener('click',()=>{
- $('studio-preview-shell').className='studio-preview-shell desktop';
+ $('studio-preview-shell').className='studio-preview-shell desktop';sizePreview();
  $('studio-desktop-view').classList.add('active');$('studio-mobile-view').classList.remove('active');
 });
 $('studio-mobile-view').addEventListener('click',()=>{
- $('studio-preview-shell').className='studio-preview-shell mobile';
+ $('studio-preview-shell').className='studio-preview-shell mobile';sizePreview();
  $('studio-mobile-view').classList.add('active');$('studio-desktop-view').classList.remove('active');
 });
 async function loadSaved(){
