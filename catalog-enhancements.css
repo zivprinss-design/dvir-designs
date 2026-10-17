@@ -1,0 +1,15 @@
+/* DVIR DESIGNS — consistent catalog imagery and useful controls */
+.catalog-tools{display:flex;gap:clamp(12px,2vw,24px);align-items:center;justify-content:center;flex-wrap:wrap}
+.catalog-tools .filters-area[hidden]{display:none!important}
+.catalog-tools:has(.filters-area[hidden]){display:flex!important}
+.catalog-tools .search-wrap{margin:0;min-width:min(100%,290px);border-radius:11px;background:#fffdfa;padding:8px 13px;min-height:44px}
+.catalog-tools .search-wrap:focus-within{border-color:#a57d79;box-shadow:0 0 0 2px #e8c8c355}
+.catalog-tools .search-wrap input{width:min(360px,48vw);font:inherit;font-size:14px;outline:0}
+.product-photo{background:#fff;isolation:isolate}
+.product-photo-trigger{display:grid;place-items:center}
+.product-photo-trigger img{width:90%;height:90%;max-height:100%;object-fit:contain}
+.pagination .load-more-products{border-radius:12px;padding:13px 29px;min-height:46px;min-width:220px;border:1px solid #cda9a3;background:#f0ceca;color:#392927;font-weight:600;font-size:15px;box-shadow:0 4px 15px #634a3b10}
+.pagination .load-more-products:hover,.pagination .load-more-products:focus-visible{background:#e7beba;outline-offset:3px}
+#whatsapp-share{margin-top:10px;border-radius:10px;color:#3e3534;background:#fff8f5;border:1px solid #cda9a3}
+#whatsapp-share:hover:not(:disabled){background:#f7e8e3}
+@media(max-width:740px){.catalog-tools{flex-direction:column;gap:12px}.catalog-tools .search-wrap{width:100%;max-width:100%}.catalog-tools .search-wrap input{width:100%;font-size:16px}.catalog-tools .filters-area{width:100%}.pagination .load-more-products{width:min(100%,320px);min-height:48px}}
