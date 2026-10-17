@@ -121,35 +121,46 @@
   <div class="cart-scrim" id="cart-scrim" hidden></div>
   <aside class="cart-panel" id="cart-panel" role="dialog" aria-label="סל המוצרים שלי" aria-modal="true" aria-hidden="true" inert>
     <div class="cart-top">
-      <div><h2>סל המוצרים שלי <span id="basket-number"></span></h2><p class="cart-top-note">בדיקת הפריטים לפני יצירת קישור לשיתוף</p></div>
+      <div><h2>סל המוצרים שלי <span id="basket-number"></span></h2><p class="cart-top-note">בחירת פריטים ובקשת הצעת מחיר · ללא תשלום באתר</p></div>
       <button class="close-cart" id="close-cart" type="button" aria-label="סגירת הסל">×</button>
     </div>
+    <div class="cart-items-title"><span>01</span><strong>הפריטים שנבחרו</strong><span class="cart-items-aux">ניתן לשנות כמות ומידה</span></div>
     <div class="cart-list" id="cart-list"></div>
     <div class="cart-bottom">
+      <div class="cart-summary-head"><span>02</span><strong>סיכום הסל</strong></div>
       <p class="cart-overview" id="cart-overview" aria-live="polite">הסל ריק</p>
       <div class="total-line"><span id="cart-total-label">סכום ביניים</span><strong id="total">₪0</strong></div>
       <p id="pricing-note" class="cart-disclaimer" hidden>הצעות מחיר הן של הלקוח וטרם אושרו על ידי העסק.</p>
       <div class="customer-identification">
+        <div class="cart-section-title"><span>03</span><strong>פרטי הלקוח והשיתוף</strong></div>
         <label for="customer-name">שם הלקוח <span aria-hidden="true">*</span></label>
         <input id="customer-name" name="customer-name" type="text" required maxlength="80" autocomplete="name" placeholder="יש להזין שם לפני שיתוף הסל" aria-describedby="customer-name-error customer-name-help">
         <p id="customer-name-error" role="alert" class="customer-name-error" hidden>חובה להזין שם לקוח לפני שיתוף הסל.</p>
         <p id="customer-name-help" class="customer-name-help">השם יופיע בהודעת WhatsApp ובקישור לסל. אין צורך להירשם.</p>
       </div>
-      <button class="pink-button full" type="button" id="share-cart">סיום ויצירת קישור לסל <span aria-hidden="true">↗</span></button>
-      <button class="outline-button full" type="button" id="whatsapp-share" disabled>שיתוף הסל ב־WhatsApp ↗</button>
+      <div class="cart-primary-actions">
+        <button class="pink-button full" type="button" id="whatsapp-share" disabled>בדיקה ושיתוף ב־WhatsApp <span aria-hidden="true">↗</span></button>
+        <button class="outline-button full" type="button" id="share-cart">יצירת קישור לסל</button>
+      </div>
       <div class="share-link-box" id="share-link-box" hidden>
         <label for="share-link-input">קישור לשיתוף הסל</label>
         <div class="share-field"><input type="text" id="share-link-input" dir="ltr" readonly aria-label="קישור לשיתוף הסל"><button type="button" id="copy-share-link" class="share-copy">העתקה</button></div>
         <p id="share-hint">הקישור מציג את כל הפריטים והכמויות כאשר פותחים אותו באתר שפורסם.</p>
       </div>
-      <button class="outline-button full" type="button" id="copy-cart">העתקת רשימת המוצרים</button>
+      <button class="cart-copy-text" type="button" id="copy-cart">העתקת רשימת המוצרים כטקסט</button>
       <p class="cart-disclaimer">המחירים המוצעים בסל הם הצעות שלך בלבד ויישמרו בקישור השיתוף. העסק צריך לאשר אותן ואת המלאי; זו אינה הזמנה ששולמה.</p>
     </div>
   </aside>
   <dialog class="image-lightbox" id="image-lightbox" aria-modal="true" aria-labelledby="zoom-caption">
     <button class="zoom-close" id="zoom-close" type="button" aria-label="סגירת תמונה מוגדלת">×</button>
-    <img id="zoom-image" alt="" decoding="async">
-    <p id="zoom-caption"></p>
+    <div class="zoom-main"><button id="zoom-prev" type="button" class="zoom-arrow" aria-label="תמונה קודמת" hidden>‹</button><img id="zoom-image" alt="" decoding="async"><button id="zoom-next" type="button" class="zoom-arrow" aria-label="תמונה הבאה" hidden>›</button></div>
+    <p id="zoom-caption"></p><p id="zoom-counter" class="zoom-counter" aria-live="polite"></p>
+  </dialog>
+  <dialog class="share-preview-dialog" id="share-preview-dialog" aria-labelledby="share-preview-title">
+    <div class="share-preview-head"><h2 id="share-preview-title">בדיקת הבקשה לפני שליחה</h2><button type="button" id="share-preview-close" aria-label="סגירת התצוגה המקדימה">×</button></div>
+    <p class="share-preview-hint">זהו סיכום הפריטים שיופיעו בבקשה. המחיר והמלאי הסופיים דורשים אישור של העסק.</p>
+    <pre id="share-preview-text" class="share-preview-text" dir="auto"></pre>
+    <div class="share-preview-actions"><button type="button" id="share-preview-back" class="outline-button">חזרה לעריכת הסל</button><button type="button" id="share-preview-send" class="pink-button">פתיחת WhatsApp ↗</button></div>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
