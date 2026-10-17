@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ניהול הקטלוג · DVIR DESIGNS</title>
+<meta name="theme-color" content="#f4e5e2">
+<script src="theme.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{font-family:Assistant,Arial,sans-serif;color:#302829;background:#f7f1ee}*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.6;cursor:wait}a{color:#654d46}
@@ -41,12 +43,16 @@ form.edit{display:grid;gap:13px}.fields2{display:grid;grid-template-columns:1fr 
  .size-row {grid-template-columns:minmax(0,1fr) 65px;gap:5px}.size-row button {grid-column:1/-1;justify-self:start}
 }
 </style>
+<link rel="stylesheet" href="theme.css">
 <script src="config.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="admin.js" defer></script>
 </head>
-<body>
-<header><div><h1>ניהול DVIR DESIGNS</h1><span>קטלוג · תמונות · מחירים · מלאי</span></div><div class="line"><a href="/">↗ לאתר</a><button type="button" class="hidden" id="logout">התנתקות</button></div></header>
+<body class="admin-page">
+<header><div><h1>ניהול DVIR DESIGNS</h1><span>קטלוג · תמונות · מחירים · מלאי</span></div><div class="line"><button type="button" class="theme-toggle" id="theme-toggle" aria-label="מעבר למצב כהה" title="מעבר למצב כהה">
+<svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 13.2A8.7 8.7 0 0 1 10.8 3.5a8.8 8.8 0 1 0 9.7 9.7Z"/></svg>
+<svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
+<span class="theme-label">מצב כהה</span></button><a href="/">↗ לאתר</a><button type="button" class="hidden" id="logout">התנתקות</button></div></header>
 <main>
  <section class="panel login" id="login-screen">
   <h2>כניסת מנהל</h2><p>הגישה לעדכון המוצרים מוגבלת למשתמשים שאושרו ב־Supabase. חשבונות מנהל לא נרשמים דרך האתר.</p>

@@ -1,0 +1,101 @@
+/* DVIR DESIGNS LIGHT/DARK THEME — loaded last to preserve original layout. */
+:root{color-scheme:light}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:8px 13px;border:1px solid #bc9993;border-radius:11px;background:#ffffff55;color:#382e2d;font:500 14px/1.2 'Assistant',Arial,sans-serif;white-space:nowrap;cursor:pointer;transition:background-color .2s,border-color .2s,color .2s}
+.theme-toggle:hover{background:#fff8f5}
+.theme-toggle:focus-visible{outline:3px solid #a87974;outline-offset:3px}
+.theme-toggle .theme-icon{display:block;flex:none}
+html:not([data-theme="dark"]) .theme-toggle .theme-icon-sun,html[data-theme="dark"] .theme-toggle .theme-icon-moon{display:none}
+@media(max-width:740px){
+ .theme-toggle{width:44px;height:44px;min-width:44px;padding:8px}
+ .theme-toggle .theme-label{display:none}
+ .site-header .nav-right,.site-header .nav-left{min-width:44px}
+}
+html[data-theme="dark"]{
+ color-scheme:dark;
+ --cream:#1c191d;--pink:#ddb2b8;--header:#2d252b;--ink:#f7eff0;--stroke:#76626a;--muted:#d2c1c6;--card:#2b252b
+}
+html[data-theme="dark"] body{background:var(--cream);color:var(--ink)}
+html[data-theme="dark"] .site-header{background:var(--header);box-shadow:0 2px 15px #0003}
+html[data-theme="dark"] .wordmark img{filter:brightness(0) invert(1)}
+html[data-theme="dark"] .theme-toggle{background:#3a3037;color:#f7eff0;border-color:#8c717c}
+html[data-theme="dark"] .theme-toggle:hover{background:#4b3944}
+html[data-theme="dark"] .basket-trigger{background:#3b3038;border-color:#816b74;color:#f7eff0}
+html[data-theme="dark"] .basket-trigger:hover{background:#493b46}
+html[data-theme="dark"] .basket-trigger svg,html[data-theme="dark"] .basket-trigger>span:not(.basket-count){color:#f7eff0}
+html[data-theme="dark"] .basket-count{background:#c58e9c;color:#211b20}
+html[data-theme="dark"] .category-image{background:#2b2529;border-color:#786870}
+html[data-theme="dark"] .category-tile:hover .category-image{box-shadow:0 13px 28px #0008}
+html[data-theme="dark"] .home-intro,html[data-theme="dark"] .category-label{color:var(--ink)}
+html[data-theme="dark"] .catalog-intro p,html[data-theme="dark"] .result-line,
+html[data-theme="dark"] .catalog-disclaimer,html[data-theme="dark"] .product-descriptor,
+html[data-theme="dark"] .product-extra,html[data-theme="dark"] .product-size-label,
+html[data-theme="dark"] .product-stock,html[data-theme="dark"] .product-options label,
+html[data-theme="dark"] .footer{color:#cdbcc1}
+html[data-theme="dark"] .back-home,html[data-theme="dark"] .source-photo-link{color:#e5b5c0}
+html[data-theme="dark"] .kind,html[data-theme="dark"] .size-chip,
+html[data-theme="dark"] .pagination button{background:#302a30;color:#f5ebed;border-color:#79656f}
+html[data-theme="dark"] .kind:hover,html[data-theme="dark"] .size-chip:hover,
+html[data-theme="dark"] .pagination button:hover{background:#493942}
+html[data-theme="dark"] .kind.active,html[data-theme="dark"] .size-chip.active,
+html[data-theme="dark"] .pagination button.active{background:#dbb0b7;color:#2b2025;border-color:#dbb0b7}
+html[data-theme="dark"] .catalog-tools{border-color:#564a50}
+html[data-theme="dark"] .search-wrap,html[data-theme="dark"] .catalog-tools .search-wrap{background:#302a30;color:#e4ced4;border-color:#79656f}
+html[data-theme="dark"] .search-wrap input{background:transparent;color:#faf1f2}
+html[data-theme="dark"] input::placeholder{color:#bba9b0;opacity:1}
+html[data-theme="dark"] .product-photo{background:#2a252b}
+html[data-theme="dark"] .product-photo-trigger::after{background:#322930e8;color:#f6eef0;border-color:#957c86}
+html[data-theme="dark"] .product-photo-trigger:hover::after{background:#57424c}
+html[data-theme="dark"] .picture-warning{background:linear-gradient(155deg,#302930,#44353c);color:#e5cbd0}
+html[data-theme="dark"] .picture-warning .photo-icon{color:#ddb1bb}
+html[data-theme="dark"] .product-size,html[data-theme="dark"] .cart-size-select{background:#302a30;color:#f6edf0;border-color:#816b74}
+html[data-theme="dark"] .pink-button,html[data-theme="dark"] .product-add,
+html[data-theme="dark"] .pagination .load-more-products{background:#dcb0b8;color:#271e22;border-color:#b58993}
+html[data-theme="dark"] .pink-button:hover,html[data-theme="dark"] .product-add:hover,
+html[data-theme="dark"] .pagination .load-more-products:hover{background:#ecc4cb}
+html[data-theme="dark"] .tables-empty{background:#2a242b;border-color:#75616a;color:#f6eef0}
+html[data-theme="dark"] .tables-empty p{color:#d0bdc3}
+html[data-theme="dark"] .cart-panel,html[data-theme="dark"] .cart-bottom{background:#262128;color:#f6edf0}
+html[data-theme="dark"] .cart-top{border-bottom-color:#63535e}
+html[data-theme="dark"] .cart-bottom{border-top-color:#63535e}
+html[data-theme="dark"] .cart-line{border-bottom-color:#584a52}
+html[data-theme="dark"] .cart-top h2,html[data-theme="dark"] .cart-line strong,
+html[data-theme="dark"] .cart-line .price,html[data-theme="dark"] .cart-bottom .total-line,
+html[data-theme="dark"] .cart-panel button:not(.basket-count){color:#f6edf0}
+html[data-theme="dark"] .cart-top-note,html[data-theme="dark"] .cart-empty,
+html[data-theme="dark"] .cart-line .meta,html[data-theme="dark"] .cart-disclaimer,
+html[data-theme="dark"] .cart-line .remove{color:#d4bfc7}
+html[data-theme="dark"] .cart-line img{background:#342b32;border-color:#675560}
+html[data-theme="dark"] .quantity-row button,html[data-theme="dark"] .cart-size-select,
+html[data-theme="dark"] .outline-button{background:#392f37;border:1px solid #806a75;color:#f9eef1}
+html[data-theme="dark"] .quantity-row button:hover,html[data-theme="dark"] .outline-button:hover{background:#513d49}
+html[data-theme="dark"] .cart-panel button.pink-button:not(.basket-count){background:#ddb2b8;color:#281d24;border-color:#aa8790}
+html[data-theme="dark"] .cart-panel button.pink-button:not(.basket-count):hover{background:#ecc4ca}
+html[data-theme="dark"] .price-offer-label{color:#e3cbd2}
+html[data-theme="dark"] .price-offer-input,html[data-theme="dark"] .share-field input{background:#342b32;color:#f9eef1;border-color:#806973}
+html[data-theme="dark"] .share-link-box{background:#342a32;border-color:#725e68}
+html[data-theme="dark"] .share-link-box label,html[data-theme="dark"] .share-link-box p{color:#e7d2da}
+html[data-theme="dark"] .share-copy{background:#dcb0b8;color:#281d24}
+html[data-theme="dark"] .image-lightbox{background:#29232a;color:#f6eff0;border-color:#806b76}
+html[data-theme="dark"] .image-lightbox #zoom-caption{color:#e9d5db}
+html[data-theme="dark"] .image-lightbox .zoom-close{background:#d9acb6;color:#24191e;border-color:#aa8791}
+html[data-theme="dark"] .toast{background:#e6c8cf;color:#281d24}
+/* Administrative interface, without changing any authentication or product data. */
+html[data-theme="dark"] body.admin-page{background:var(--cream);color:var(--ink)}
+html[data-theme="dark"] body.admin-page header{background:var(--header);color:var(--ink)}
+html[data-theme="dark"] body.admin-page header span,
+html[data-theme="dark"] body.admin-page .muted,html[data-theme="dark"] body.admin-page .admin-note,
+html[data-theme="dark"] body.admin-page .item small{color:#d3bec5}
+html[data-theme="dark"] body.admin-page a{color:#e6b9c4}
+html[data-theme="dark"] body.admin-page .panel{background:#2a252b;border-color:#6d5964;box-shadow:0 5px 25px #0003}
+html[data-theme="dark"] body.admin-page input,html[data-theme="dark"] body.admin-page select,
+html[data-theme="dark"] body.admin-page textarea{background:#352d35;color:#faf1f4;border-color:#846c78}
+html[data-theme="dark"] body.admin-page button:not(.theme-toggle),
+html[data-theme="dark"] body.admin-page .button{background:#d6abb5;color:#2a2025;border-color:#b78f9a}
+html[data-theme="dark"] body.admin-page button:not(.theme-toggle):hover{background:#ebc4cc}
+html[data-theme="dark"] body.admin-page .item{border-color:#695762}
+html[data-theme="dark"] body.admin-page .item img,html[data-theme="dark"] body.admin-page .thumb{background:#39313a;border-color:#75616d}
+html[data-theme="dark"] body.admin-page .ok{color:#9ee2b2}
+html[data-theme="dark"] body.admin-page .err{color:#ff9eaa}
+html[data-theme="dark"] body.admin-page .theme-toggle{background:#3a3037;color:#f7eff0;border-color:#8c717c}
+html[data-theme="dark"] body.admin-page .theme-toggle:hover{background:#4b3944}
+@media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}
