@@ -98,7 +98,8 @@ function changeLocation(type,updateHash=true){
     page=1;search='';sizeFilter='';$('search-products').value='';
     getAll('[data-size]').forEach(b=>b.classList.toggle('active',b.dataset.size===''));
     getAll('[data-category]').forEach(b=>b.classList.toggle('active',b.dataset.category===category));
-    const titles={pillows:'קטלוג כריות',curtains:'קטלוג וילונות',tables:'קטלוג מפות',all:'הקטלוג המלא'};
+    const designLabels=window.DVIR_DESIGN_LABELS||{};
+    const titles={pillows:designLabels.pillows||'קטלוג כריות',curtains:designLabels.curtains||'קטלוג וילונות',tables:designLabels.tables||'קטלוג מפות',all:'הקטלוג המלא'};
     $('catalog-heading').textContent=titles[category];
     $('catalog-subtitle').textContent='בחרו פריטים, מידות וכמויות והוסיפו אותם לסל.';
     const tables=false;$('tables-empty').hidden=true;
