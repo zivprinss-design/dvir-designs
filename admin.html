@@ -136,7 +136,14 @@ html[data-theme="dark"] .admin-preview-dialog #admin-preview-content{background:
 <label>טקסט כהה<span class="studio-color-line"><input type="color" name="darkText" aria-label="טקסט כהה"><output data-color-for="darkText"></output></span></label>
 <label>רקע כרטיסים<span class="studio-color-line"><input type="color" name="darkCard" aria-label="רקע כרטיסים"><output data-color-for="darkCard"></output></span></label>
 <label>מסגרות כהות<span class="studio-color-line"><input type="color" name="darkBorder" aria-label="מסגרות כהות"><output data-color-for="darkBorder"></output></span></label></div></fieldset>
-        <fieldset class="studio-fieldset"><legend>פונטים וטיפוגרפיה</legend><div class="studio-two">
+        <fieldset class="studio-fieldset"><legend>מיתוג ותמונות דף הבית</legend>
+<p class="admin-note">בחר תמונה חדשה מהמחשב או הדבק כתובת HTTPS. העלאה נשמרת ב־Supabase רק כשלוחצים ״שמירה ופרסום באתר״.</p>
+<div class="studio-brand-fields"><div class="studio-brand-row"><label>לוגו האתר<input name="logoUrl" type="text" placeholder="assets/... או https://..." maxlength="500"></label><label>העלאת קובץ חדש<input data-brand-upload="logoUrl" id="logoUpload" type="file" accept="image/png,image/jpeg,image/webp"></label></div>
+<div class="studio-brand-row"><label>תמונת קטגוריית כריות<input name="homePillowsImage" type="text" placeholder="assets/... או https://..." maxlength="500"></label><label>העלאת קובץ חדש<input data-brand-upload="homePillowsImage" id="pillowsUpload" type="file" accept="image/png,image/jpeg,image/webp"></label></div>
+<div class="studio-brand-row"><label>תמונת קטגוריית וילונות<input name="homeCurtainsImage" type="text" placeholder="assets/... או https://..." maxlength="500"></label><label>העלאת קובץ חדש<input data-brand-upload="homeCurtainsImage" id="curtainsUpload" type="file" accept="image/png,image/jpeg,image/webp"></label></div>
+<div class="studio-brand-row"><label>תמונת קטגוריית מפות<input name="homeTablesImage" type="text" placeholder="assets/... או https://..." maxlength="500"></label><label>העלאת קובץ חדש<input data-brand-upload="homeTablesImage" id="tablesUpload" type="file" accept="image/png,image/jpeg,image/webp"></label></div></div>
+</fieldset>
+<fieldset class="studio-fieldset"><legend>פונטים וטיפוגרפיה</legend><div class="studio-two">
         <label>פונט כללי<select name="font"><option>Assistant</option><option>Heebo</option><option>Rubik</option><option>Alef</option><option>Frank Ruhl Libre</option></select></label>
         <label>פונט לכותרות<select name="headingFont"><option>Heebo</option><option>Assistant</option><option>Rubik</option><option>Alef</option><option>Frank Ruhl Libre</option></select></label>
         </div></fieldset>
@@ -146,7 +153,9 @@ html[data-theme="dark"] .admin-preview-dialog #admin-preview-content{background:
 <label>עיגול פינות הכרטיסים<span class="studio-range-line"><input name="cardRadius" type="range" min="0" max="35" step="1"><output data-range-for="cardRadius" data-suffix=" px"></output></span></label>
 <label>עיגול פינות התמונות<span class="studio-range-line"><input name="imageRadius" type="range" min="0" max="35" step="1"><output data-range-for="imageRadius" data-suffix=" px"></output></span></label>
 <label>עיגול פינות הכפתורים<span class="studio-range-line"><input name="buttonRadius" type="range" min="0" max="35" step="1"><output data-range-for="buttonRadius" data-suffix=" px"></output></span></label>
-<label>גובה הכותרת במחשב<span class="studio-range-line"><input name="headerHeight" type="range" min="78" max="140" step="1"><output data-range-for="headerHeight" data-suffix=" px"></output></span></label></div><div class="studio-two">
+<label>גובה הכותרת במחשב<span class="studio-range-line"><input name="headerHeight" type="range" min="78" max="140" step="1"><output data-range-for="headerHeight" data-suffix=" px"></output></span></label>
+<label>גובה הלוגו <span class="studio-range-line"><input name="logoHeight" type="range" min="45" max="160" step="1"><output data-range-for="logoHeight" data-suffix=" px"></output></span></label>
+<label>גודל הכותרת הראשית במחשב <span class="studio-range-line"><input name="heroTitleSize" type="range" min="28" max="84" step="1"><output data-range-for="heroTitleSize" data-suffix=" px"></output></span></label></div><div class="studio-two">
         <label>חיתוך תמונות בקטלוג<select name="imageFit"><option value="cover">ממלא את המסגרת (חיתוך לפי הצורך)</option><option value="contain">כל התמונה בתוך המסגרת</option></select></label>
         <label>יחס תמונות<select name="imageRatio"><option value="square">ריבוע 1:1</option><option value="portrait">לאורך 4:5</option><option value="landscape">לרוחב 5:4</option></select></label>
         </div></fieldset>
