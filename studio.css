@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Alef:wght@400;700&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Heebo:wght@400;500;600;700&display=swap');
+/* DVIR DESIGNS — admin design studio */
+.studio-tabs{display:flex;align-items:center;gap:7px;margin:0 0 24px;padding:7px;border:1px solid #e2cfc9;border-radius:15px;background:#fffdfb;position:sticky;top:0;z-index:8;box-shadow:0 4px 15px #4f2f2b0c}
+.studio-tabs button{flex:1;min-height:46px;white-space:nowrap;background:transparent;border-color:transparent;font-weight:600}
+.studio-tabs button:hover{background:#f7e8e5}
+.studio-tabs button.active{background:#ebc8c5;border-color:#c9a59e}
+.studio-pane[hidden]{display:none!important}
+.studio-intro{display:flex;justify-content:space-between;align-items:start;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.studio-intro h2{font-size:27px;margin:0 0 5px}
+.studio-intro p{max-width:840px;margin:0}
+.studio-mini-tag{display:inline-flex;align-items:center;border:1px solid #d8beb5;background:#fff6f2;border-radius:40px;padding:8px 12px;font-size:12px;color:#725047}
+.studio-design-layout{display:grid;grid-template-columns:minmax(340px,1.05fr) minmax(400px,1fr);gap:20px;align-items:start}
+.studio-design-form{display:flex;flex-direction:column;gap:17px;min-width:0}
+.studio-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.studio-presets button{min-height:44px;font-size:13px;padding:9px 7px;text-align:center}
+.studio-presets button.active{outline:2px solid #b27c77;outline-offset:2px}
+.studio-fieldset{display:block;margin:0;border:1px solid #e8d6cf;border-radius:12px;padding:15px 13px}
+.studio-fieldset legend{font-size:17px;font-weight:700;padding:0 7px}
+.studio-colors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.studio-colors label{min-width:0}
+.studio-color-line{display:flex;align-items:center;gap:8px}
+.studio-color-line input[type=color]{width:55px;height:42px;min-width:55px;padding:3px;cursor:pointer}
+.studio-color-line output{font:12px Arial,sans-serif;direction:ltr;white-space:nowrap;color:#74605a}
+.studio-two,.studio-ranges{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.studio-fieldset .studio-two{margin-top:10px}
+.studio-fieldset .studio-two:first-child{margin-top:0}
+.studio-ranges label{min-width:0}
+.studio-range-line{display:flex;align-items:center;gap:10px}
+.studio-range-line input[type=range]{flex:1;min-width:35px;accent-color:#a67372;padding:0}
+.studio-range-line output{font:12px Arial,sans-serif;direction:ltr;white-space:nowrap;min-width:32px;text-align:left}
+.studio-design-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.studio-design-actions button{min-height:45px}
+.studio-publish{background:#e6bab8;border-color:#bb8d86;font-weight:700}
+.studio-publish:hover{background:#e7b0ad}
+.studio-live-preview{position:sticky;top:85px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.studio-preview-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.studio-preview-top button{font-size:13px;padding:8px 12px}
+.studio-preview-top button.active{background:#deb2b0}
+.studio-preview-shell{background:#eee1df;border:1px solid #e0cdc6;border-radius:15px;padding:10px;display:flex;justify-content:center;overflow:hidden;max-width:100%;transition:padding .2s}
+.studio-preview-shell iframe{width:100%;min-height:650px;height:70vh;border:0;background:white;border-radius:9px}
+.studio-preview-shell.mobile iframe{width:390px;max-width:100%;min-height:620px;height:72vh;flex:none}
+.photo-edit-workspace{display:grid;grid-template-columns:minmax(270px,390px) minmax(320px,1fr);gap:30px}
+.photo-edit-controls{display:flex;flex-direction:column;gap:13px}
+.photo-edit-controls label{font-size:14px}
+.photo-edit-controls input[type=range]{width:100%;accent-color:#ac8078;padding:0}
+.photo-edit-controls output{font-size:12px;color:#76615b}
+.photo-edit-controls select{min-height:44px}
+.photo-upload-button{position:relative;display:inline-flex;align-items:center;background:#ecc6c2;border:1px solid #b98e87;border-radius:10px;color:#302829;padding:10px 14px;cursor:pointer}
+.photo-upload-button input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.photo-toggle{display:flex;align-items:center;flex-direction:row;gap:9px}
+.photo-canvas-wrap{position:sticky;top:85px;min-width:0}
+#photo-canvas{display:block;width:min(100%,600px);height:auto;max-height:70vh;object-fit:contain;background:repeating-conic-gradient(#ebe5e2 0% 25%,#f8f3f0 0% 50%) 50%/20px 20px;border:1px solid #d1b6ab;border-radius:11px}
+.photo-canvas-wrap .admin-note{max-width:630px}
+html[data-theme=dark] .studio-tabs{background:#302930;border-color:#67565f}
+html[data-theme=dark] .studio-tabs button{color:#faeef3}
+html[data-theme=dark] .studio-tabs button.active{background:#56404c;border-color:#9e7c88}
+html[data-theme=dark] .studio-fieldset{border-color:#75636c}
+html[data-theme=dark] .studio-color-line output,html[data-theme=dark] .photo-edit-controls output{color:#e3c6d0}
+html[data-theme=dark] .studio-mini-tag{background:#39313a;color:#ecdae0;border-color:#78616c}
+html[data-theme=dark] .studio-preview-shell{background:#41333a;border-color:#75626a}
+html[data-theme=dark] .photo-upload-button{background:#d5aeb7;color:#2b2027}
+@media(max-width:1100px){.studio-design-layout,.photo-edit-workspace{grid-template-columns:1fr}.studio-live-preview,.photo-canvas-wrap{position:static}.studio-preview-shell iframe{height:65vh}}
+@media(max-width:700px){
+ .studio-tabs{gap:3px;padding:4px;margin-bottom:16px}
+ .studio-tabs button{font-size:13px;min-height:45px;padding:7px 5px}
+ .studio-intro h2{font-size:22px}
+ .studio-design-form{padding:13px}
+ .studio-colors,.studio-ranges,.studio-two{grid-template-columns:1fr}
+ .studio-presets{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .studio-design-actions button{flex:1 1 140px}
+ .studio-preview-shell{padding:5px}
+ .studio-preview-shell iframe{height:60vh;min-height:480px}
+ .photo-edit-workspace{padding:14px;gap:16px}
+}
+@media(max-width:390px){.studio-tabs button{font-size:12px}.studio-fieldset{padding:12px 9px}.studio-design-actions button{flex:1 1 100%}}
