@@ -142,8 +142,8 @@ function renderCard(p,imagePriority=99){
  const unavailable=origin?`<a class="source-photo-link" href="${origin}" target="_blank" rel="noopener noreferrer">צפייה בקטלוג התמונות המקורי ↗</a>`:'';
  const subtitle=p.category==='curtains'&&p.height?`<span class="product-extra">גובה מרבי: ${p.height} מטר</span>`:'';
  const extraDetails=showSizeSelector?`<label for="size-${html(p.key)}">בחירת מידה</label><select class="product-size" id="size-${html(p.key)}" data-size-for="${html(p.key)}">${options}</select>`:'';
- return `<article class="product-card" data-key="${html(p.key)}" aria-label="${html(p.title)}">
-   <div class="product-photo${available?'':' is-broken'}">${image}<div class="picture-warning"><span class="photo-icon">◈</span><span>תמונת דגם טרם זמינה</span>${unavailable}</div></div>
+ return `<article class="product-card" data-key="${html(p.key)}" data-category="${html(p.category)}" aria-label="${html(p.title)}">
+   <div class="product-photo${available?'':' is-broken'}">${image}${productImages(p).length>1?'<span class="product-gallery-count">+'+(productImages(p).length-1)+' תמונות</span>':''}<div class="picture-warning"><span class="photo-icon">◈</span><span>תמונת דגם טרם זמינה</span>${unavailable}</div></div>
    <h3 class="product-title">${itemCaption(p)}</h3>
    ${p.category!=='pillows'?`<div class="product-descriptor">${html(p.title)}</div>`:''}
    <div class="product-price">${priced?money(p.price):'מחיר לפי בירור'}</div>
