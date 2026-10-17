@@ -25,3 +25,23 @@
 .price-offer-input:focus{outline:2px solid #b78e86;outline-offset:1px}
 .cart-product-details{min-width:0}
 @media(max-width:510px){.price-offer-label{align-items:flex-start;flex-direction:column;gap:5px}.price-offer-input{width:100%;max-width:160px;flex-basis:auto}}
+
+/* Desktop catalog layout refinement — richer photography, unchanged mobile design. */
+@media(min-width:1101px){
+  .products-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:26px 22px}
+  .product-card{min-height:420px;padding:14px 15px 15px;border-radius:14px}
+  .product-photo{border-radius:10px}
+  .product-title{font-size:19px;margin-top:12px}
+  .product-add{min-height:41px;font-size:14px}
+}
+@media(min-width:741px) and (max-width:1100px){
+  .products-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 16px}
+}
+.cart-overview{display:block;margin:0 0 10px;padding-bottom:9px;border-bottom:1px solid #eee0db;font-size:13px;line-height:1.35;font-weight:600;color:#715a54}
+.cart-model{font-size:12px;line-height:1.4;color:#8f6d66;margin-bottom:3px;font-weight:600}
+.cart-bottom .total-line{gap:12px}
+.cart-bottom .total-line span{line-height:1.4}
+@media(max-width:700px){
+  .cart-overview{font-size:12px}
+  .cart-model{font-size:11px}
+}
