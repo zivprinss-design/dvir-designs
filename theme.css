@@ -154,3 +154,14 @@ html[data-theme="dark"] .instagram-nav-button:hover{background:#4b3944}
   .instagram-nav-button svg{width:19px;height:19px}
 }
 @media(prefers-reduced-motion:reduce){.instagram-nav-button{transition:none}}
+
+/* Dark-mode customer identity and cart summary readability. */
+html[data-theme="dark"] .customer-identification label,
+html[data-theme="dark"] .cart-overview{color:#e9dce0}
+html[data-theme="dark"] .cart-overview{border-bottom-color:#5f5159}
+html[data-theme="dark"] .cart-model{color:#d7b9c3}
+html[data-theme="dark"] .customer-name-help{color:#c6b6bd}
+html[data-theme="dark"] .customer-name-error{color:#ffa4b3}
+html[data-theme="dark"] .customer-identification input{background:#352d35;color:#faf1f4;border-color:#846c78}
+html[data-theme="dark"] .customer-identification input::placeholder{color:#bca9b0}
+html[data-theme="dark"] .customer-identification input:focus{outline-color:#dcb0b8}
