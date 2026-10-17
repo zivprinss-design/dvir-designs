@@ -4,7 +4,7 @@
 const $=id=>document.getElementById(id);
 if(!$('studio-design-form'))return;
 const tabs=[...document.querySelectorAll('[data-studio-tab]')];
-const panes=['products','design','photos'];
+const panes=['products','design','photos','inbox'];
 function switchTab(tab){
  if(!panes.includes(tab))return;
  for(const b of tabs){const active=b.dataset.studioTab===tab;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active))}
