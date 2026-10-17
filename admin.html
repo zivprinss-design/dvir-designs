@@ -70,6 +70,7 @@ html[data-theme="dark"] .admin-preview-dialog #admin-preview-content{background:
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="admin.js" defer></script>
 <script src="studio.js" defer></script>
+<script src="inbox.js" defer></script>
 </head>
 <body class="admin-page">
 <header><div><h1>ניהול DVIR DESIGNS</h1><span>קטלוג · תמונות · מחירים · מלאי</span></div><div class="line"><button type="button" class="theme-toggle" id="theme-toggle" aria-label="מעבר למצב כהה" title="מעבר למצב כהה">
@@ -87,6 +88,7 @@ html[data-theme="dark"] .admin-preview-dialog #admin-preview-content{background:
     <button type="button" data-studio-tab="products" class="active" aria-selected="true">מוצרים ומלאי</button>
     <button type="button" data-studio-tab="design" aria-selected="false">עיצוב האתר</button>
     <button type="button" data-studio-tab="photos" aria-selected="false">עורך תמונות</button>
+    <button type="button" data-studio-tab="inbox" aria-selected="false">דואר נכנס <span id="inbox-new-count" class="inbox-count" hidden></span></button>
   </nav>
   <div id="studio-pane-products" class="studio-pane">
   <div class="bar"><input id="search" type="search" placeholder="חיפוש לפי שם / מספר דגם"><select id="category-filter"><option value="">כל הקטגוריות</option><option value="pillows">כריות</option><option value="curtains">וילונות</option><option value="tables">מפות</option></select><button id="new-product" type="button">+ הוספת מוצר</button><button id="refresh" type="button">רענון</button></div>
@@ -112,6 +114,28 @@ html[data-theme="dark"] .admin-preview-dialog #admin-preview-content{background:
    </section>
   </div>
   </div>
+  <section id="studio-pane-inbox" class="studio-pane" hidden>
+    <div class="studio-intro">
+      <div><h2>תיבת בקשות מלקוחות</h2>
+        <p class="muted">כאן מופיעות בקשות לסלי מוצרים שנוצרו או שותפו. מספרי טלפון מופיעים רק כאן, אם הלקוחות בחרו למסור אותם. זו אינה מערכת תשלומים.</p>
+      </div><span id="inbox-stats" class="studio-mini-tag">טוען בקשות...</span>
+    </div>
+    <div class="inbox-toolbar panel">
+      <input id="inbox-search" type="search" placeholder="חיפוש לפי שם לקוח, טלפון או מספר קישור" aria-label="חיפוש בקשות">
+      <select id="inbox-filter" aria-label="סינון בקשות"><option value="">כל הבקשות</option><option value="new">חדשות</option><option value="read">נקראו</option><option value="archived">בארכיון</option></select>
+      <button id="inbox-refresh" type="button">רענון בקשות</button>
+    </div>
+    <div class="inbox-layout">
+      <section class="panel inbox-list-panel" aria-label="רשימת בקשות">
+        <h3>בקשות שהתקבלו <span id="inbox-visible-count"></span></h3>
+        <div id="inbox-list" class="inbox-list" aria-live="polite"></div>
+      </section>
+      <section class="panel inbox-detail-panel" aria-label="פרטי בקשה">
+        <div id="inbox-detail"><p class="muted">בחר בקשה מהרשימה כדי לראות פריטים, שם לקוח ופרטי קשר אם נמסרו.</p></div>
+      </section>
+    </div>
+    <p id="inbox-status" role="status" class="status"></p>
+  </section>
   <section id="studio-pane-design" class="studio-pane" hidden>
     <div class="studio-intro"><div><h2>סטודיו לעיצוב האתר</h2><p class="muted">התאמת צבעים, טיפוגרפיה, פריסה, פינות ותוכן האתר. התצוגה כאן היא טיוטה בלבד; רק שמירה מפרסמת שינוי לכל הלקוחות.</p></div>
       <span class="studio-mini-tag">השינויים חלים על האתר ללא פריסה מחדש</span></div>
