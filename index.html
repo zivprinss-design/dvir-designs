@@ -137,7 +137,11 @@
         <label for="customer-name">שם הלקוח <span aria-hidden="true">*</span></label>
         <input id="customer-name" name="customer-name" type="text" required maxlength="80" autocomplete="name" placeholder="יש להזין שם לפני שיתוף הסל" aria-describedby="customer-name-error customer-name-help">
         <p id="customer-name-error" role="alert" class="customer-name-error" hidden>חובה להזין שם לקוח לפני שיתוף הסל.</p>
-        <p id="customer-name-help" class="customer-name-help">השם יופיע בהודעת WhatsApp ובקישור לסל. אין צורך להירשם.</p>
+        <p id="customer-name-help" class="customer-name-help">שם הלקוח יישמר בבקשה וישותף עם מי שיקבל את קישור הסל. אין צורך להירשם.</p>
+        <label for="customer-phone">מספר טלפון <span class="phone-optional">(לא חובה)</span></label>
+        <input id="customer-phone" name="customer-phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="22" placeholder="למשל 050-1234567" aria-describedby="customer-phone-help customer-phone-error">
+        <p id="customer-phone-error" class="customer-name-error" role="alert" hidden>מספר טלפון לא תקין. השאר ריק או הזן מספר עם 7–15 ספרות.</p>
+        <p id="customer-phone-help" class="customer-name-help">אם תוסיף מספר, הוא יישמר בתיבת הבקשות הפרטית של מנהל האתר בלבד. המספר לא יופיע בקישור הסל או ב־WhatsApp.</p>
       </div>
       <div class="cart-primary-actions">
         <button class="pink-button full" type="button" id="whatsapp-share" disabled>בדיקה ושיתוף ב־WhatsApp <span aria-hidden="true">↗</span></button>
