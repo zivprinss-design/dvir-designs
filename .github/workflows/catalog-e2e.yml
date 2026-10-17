@@ -1,0 +1,35 @@
+name: Catalog and cart browser smoke tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/site.spec.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout website
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: npm install --no-save --no-package-lock @playwright/test@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test desktop and mobile storefront
+        run: npx playwright test tests/site.spec.js --workers=1 --reporter=line
+      - name: Upload screenshots and failure traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dvir-browser-review
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
