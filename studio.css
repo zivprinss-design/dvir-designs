@@ -121,3 +121,8 @@ html[data-theme="dark"] .inbox-detail-actions button,
 html[data-theme="dark"] .inbox-detail-actions .inbox-share-link{background:#493741;color:#f6edf0;border-color:#806b76}
 @media(max-width:950px){.inbox-layout{grid-template-columns:1fr}.inbox-list-panel{max-height:42vh}}
 @media(max-width:700px){.studio-tabs{overflow-x:auto;justify-content:start}.studio-tabs button{flex:0 0 auto;min-width:92px}.inbox-toolbar{padding:10px}.inbox-toolbar input{flex:1 1 100%}.inbox-toolbar select{flex:1}.inbox-toolbar button{flex:1}}
+
+.inbox-delete-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 12px;margin-top:15px;background:transparent;border:1px solid #ba8687;border-radius:9px;color:#9f444b;font-size:13px;font-weight:600}
+.inbox-delete-button:hover{background:#f9e6e6}
+html[data-theme="dark"] .inbox-delete-button{border-color:#bc8992;color:#ffc0c6}
+html[data-theme="dark"] .inbox-delete-button:hover{background:#57353d}
