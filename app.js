@@ -85,7 +85,7 @@ function renderCard(p){
  const available=Boolean(picture(p));
  const showSizeSelector=p.category!=='curtains'&&p.sizes.length>1;
  const options=p.sizes.map(s=>`<option value="${html(s)}">${html(s)}</option>`).join('');
- const image=available?`<img src="${picture(p)}" alt="${html(p.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true;this.parentElement.classList.add('is-broken')">`:'';
+ const image=available?`<button type="button" class="product-photo-trigger" data-zoom="${html(p.key)}" title="הגדלת התמונה" aria-label="הגדלת תמונה של ${html(p.title)}"><img src="${picture(p)}" alt="${html(p.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true;this.closest('.product-photo').classList.add('is-broken')"></button>`:'';
  const origin=p.category==='curtains'?'https://dvir-designs.squarespace.com/curtains':p.category==='tables'?'https://dvir-designs.squarespace.com/pillows-1':'';
  const unavailable=origin?`<a class="source-photo-link" href="${origin}" target="_blank" rel="noopener noreferrer">צפייה בקטלוג התמונות המקורי ↗</a>`:'';
  const subtitle=p.category==='curtains'&&p.height?`<span class="product-extra">גובה מרבי: ${p.height} מטר</span>`:'';
@@ -125,7 +125,7 @@ function renderCatalog(){const rows=filtered();const perPage=10;const pages=Math
 function cartRows(){return Object.entries(cart).map(([key,qty])=>{const [id,size]=JSON.parse(key);return {p:byKey.get(id),size,qty,key}}).filter(x=>x.p)}
 function count(){return Object.values(cart).reduce((a,n)=>a+Number(n),0)}
 function renderCart(){const rows=cartRows(),n=count();$('cart-count').textContent=n;$('cart-count').hidden=!n;$('basket-number').textContent=n?'('+n+')':'';
-  $('cart-list').innerHTML=rows.length?rows.map(({p,size,qty,key})=>`<div class="cart-line"><img src="${picture(p)||'assets/placeholder.svg'}" onerror="this.onerror=null;this.src='assets/placeholder.svg'" alt=""><div><strong>${html(p.title)}</strong><div class="meta">${p.sizes.length>1?`<label class="sr-only" for="cart-size-${html(p.key)}">שינוי מידה</label><select class="cart-size-select" id="cart-size-${html(p.key)}" data-cart-size="${html(key)}">${p.sizes.map(z=>`<option value="${html(z)}" ${z===size?'selected':''}>${html(z)}</option>`).join('')}</select>`:p.category==='curtains'?'':html(size)}${p.category==='curtains'?'':' · '}${html(p.color)}</div><div class="price">${p.price!=null?money(p.price*qty):'מחיר לפי הצעה'}</div><div class="quantity-row"><button data-action="plus" data-key="${html(key)}" aria-label="הוספת יחידה">+</button><span>${qty}</span><button data-action="minus" data-key="${html(key)}" aria-label="הפחתת יחידה">−</button><button class="remove" data-action="remove" data-key="${html(key)}">הסרה</button></div></div></div>`).join(''):'<div class="cart-empty"><span class="symbol">♡</span>הסל ריק כרגע.<br>בחרו מוצרים מהקטלוג.</div>';
+  $('cart-list').innerHTML=rows.length?rows.map(({p,size,qty,key})=>`<div class="cart-line"><button class="cart-photo-trigger" type="button" data-zoom="${html(p.key)}" title="הגדלת התמונה" aria-label="הגדלת תמונה של ${html(p.title)}"><img src="${picture(p)||'assets/placeholder.svg'}" onerror="this.onerror=null;this.src='assets/placeholder.svg'" alt=""></button><div><strong>${html(p.title)}</strong><div class="meta">${p.sizes.length>1?`<label class="sr-only" for="cart-size-${html(p.key)}">שינוי מידה</label><select class="cart-size-select" id="cart-size-${html(p.key)}" data-cart-size="${html(key)}">${p.sizes.map(z=>`<option value="${html(z)}" ${z===size?'selected':''}>${html(z)}</option>`).join('')}</select>`:p.category==='curtains'?'':html(size)}${p.category==='curtains'?'':' · '}${html(p.color)}</div><div class="price">${p.price!=null?money(p.price*qty):'מחיר לפי הצעה'}</div><div class="quantity-row"><button data-action="plus" data-key="${html(key)}" aria-label="הוספת יחידה">+</button><span>${qty}</span><button data-action="minus" data-key="${html(key)}" aria-label="הפחתת יחידה">−</button><button class="remove" data-action="remove" data-key="${html(key)}">הסרה</button></div></div></div>`).join(''):'<div class="cart-empty"><span class="symbol">♡</span>הסל ריק כרגע.<br>בחרו מוצרים מהקטלוג.</div>';
   promoteOriginalPictures($('cart-list'));
   $('total').textContent=money(rows.reduce((t,{p,qty})=>t+(p.price||0)*qty,0));
   $('pricing-note').hidden=!rows.some(({p})=>p.price==null);
@@ -155,6 +155,26 @@ function decodeShare(token){if(!token||token.length>20000)throw Error('invalid')
 async function copy(text){try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);return true}}catch(e){}
   const el=document.createElement('textarea');el.value=text;el.style.cssText='position:fixed;left:-2000px';document.body.appendChild(el);el.focus();el.select();let ok;try{ok=document.execCommand('copy')}catch(e){ok=false}el.remove();if(!ok)window.prompt('העתיקו את הטקסט:',text);return Boolean(ok)}
 function cartDescription(){let parts=['DVIR DESIGNS — סל מוצרים',''];for(const {p,size,qty} of cartRows())parts.push(`${p.title} | ${p.color}${p.category==='curtains'?'':' | '+size} | כמות: ${qty} | ${p.price!=null?money(p.price*qty):'מחיר לפי הצעה'}`);parts.push('',`סכום ידוע: ${$('total').textContent}`,'המחירים והמלאי כפופים לאישור העסק.');return parts.join('\n')}
+const zoomDialog=$('image-lightbox');
+let zoomOrigin=null;
+function openZoom(key){
+  const p=byKey.get(key),src=p?.localImage||p?.image;
+  if(!src||zoomDialog.open)return;
+  zoomOrigin=document.activeElement;
+  $('zoom-image').src=src;
+  $('zoom-image').alt=p.title||'תמונת מוצר';
+  $('zoom-caption').textContent=p.title||'תמונת מוצר';
+  zoomDialog.showModal();
+  $('zoom-close').focus();
+}
+function closeZoom(){if(zoomDialog.open)zoomDialog.close()}
+$('zoom-close').addEventListener('click',closeZoom);
+zoomDialog.addEventListener('click',e=>{if(e.target===zoomDialog)closeZoom()});
+zoomDialog.addEventListener('close',()=>{
+  $('zoom-image').removeAttribute('src');
+  if(zoomOrigin?.isConnected)zoomOrigin.focus({preventScroll:true});
+  zoomOrigin=null;
+});
 function readHash(){const tag=location.hash.replace('#','');changeLocation(['pillows','curtains','tables','all','home'].includes(tag)?tag:'home',false)}
 getAll('[data-nav]').forEach(node=>node.addEventListener('click',e=>{e.preventDefault();changeLocation(node.dataset.nav)}));
 getAll('[data-category]').forEach(node=>node.addEventListener('click',()=>changeLocation(node.dataset.category)));
@@ -162,11 +182,13 @@ getAll('[data-size]').forEach(node=>node.addEventListener('click',()=>{sizeFilte
 $('search-products').addEventListener('input',e=>{search=e.target.value;page=1;renderCatalog()});
 $('products-grid').addEventListener('change',e=>{const key=e.target.dataset.sizeFor;if(!key)return;const p=byKey.get(key);$('stock-'+key).textContent=stockText(p,e.target.value)});
 $('products-grid').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b)return;const key=b.dataset.add;addToCart(key,$('size-'+key)?.value || byKey.get(key)?.sizes?.[0])});
+$('products-grid').addEventListener('click',e=>{const button=e.target.closest('.product-photo-trigger[data-zoom]');if(button && !button.closest('.product-photo')?.classList.contains('is-broken'))openZoom(button.dataset.zoom)});
 $('pagination').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(!b)return;page=Number(b.dataset.page);renderCatalog();window.scrollTo({top:0,behavior:'smooth'})});
 $('cart-trigger').addEventListener('click',openCart);$('close-cart').addEventListener('click',closeCart);$('cart-scrim').addEventListener('click',closeCart);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('cart-panel').classList.contains('is-open'))closeCart()});
 $('cart-list').addEventListener('change',e=>{const field=e.target.closest('[data-cart-size]');if(field)updateCartSize(field.dataset.cartSize,field.value)});
 $('cart-list').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;changeQty(b.dataset.key,b.dataset.action==='plus'?1:b.dataset.action==='minus'?-1:-100000)});
+$('cart-list').addEventListener('click',e=>{const b=e.target.closest('.cart-photo-trigger[data-zoom]');if(b)openZoom(b.dataset.zoom)});
 $('share-cart').addEventListener('click',async()=>{
   if(!count())return;
   const token=encodeShare();
