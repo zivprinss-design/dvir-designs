@@ -165,3 +165,8 @@ html[data-theme="dark"] .customer-name-error{color:#ffa4b3}
 html[data-theme="dark"] .customer-identification input{background:#352d35;color:#faf1f4;border-color:#846c78}
 html[data-theme="dark"] .customer-identification input::placeholder{color:#bca9b0}
 html[data-theme="dark"] .customer-identification input:focus{outline-color:#dcb0b8}
+
+/* Final pass: visible state for the offline catalog notice and back-to-top control. */
+html[data-theme="dark"] .catalog-backup-warning{background:#402d35;color:#ffe2e1;border-color:#98636d}
+html[data-theme="dark"] .back-to-top{background:#3a3037;color:#f7eff0;border-color:#8c717c}
+html[data-theme="dark"] .back-to-top:hover{background:#4b3944}
