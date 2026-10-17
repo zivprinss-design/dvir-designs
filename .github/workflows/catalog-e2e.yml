@@ -6,7 +6,7 @@ on:
       - 'tests/site.spec.js'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   browser-smoke:
     runs-on: ubuntu-latest
@@ -23,7 +23,20 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Test desktop and mobile storefront
+        id: qa
         run: npx playwright test tests/site.spec.js --workers=1 --reporter=line
+      - name: Commit QA result for review
+        if: always()
+        env:
+          QA_RESULT: ${{ steps.qa.outcome }}
+        run: |
+          mkdir -p reports
+          python3 -c 'import json,os;json.dump({"result":os.environ["QA_RESULT"],"run_id":os.environ["GITHUB_RUN_ID"],"commit":os.environ["GITHUB_SHA"]},open("reports/latest-qa.json","w"),indent=2)'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/latest-qa.json
+          git commit -m "Record storefront browser test result" || true
+          git push || true
       - name: Upload screenshots and failure traces
         if: always()
         uses: actions/upload-artifact@v4
