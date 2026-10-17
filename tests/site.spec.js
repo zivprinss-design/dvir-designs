@@ -60,3 +60,36 @@ test('Tiny phones and admin access boundary', async ({ page }) => {
   await expect(page.locator('#login-screen')).toBeVisible();
   await expect(page.locator('#dashboard')).toBeHidden();
 });
+
+test('Studio design preview and local photo cropping do not require publishing to inspect', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/admin.html');
+  await expect(page.locator('#login-screen')).toBeVisible();
+  // In the smoke suite, reveal the UI only; backend writes still require real admin RLS.
+  await page.evaluate(() => document.getElementById('dashboard').classList.remove('hidden'));
+  await page.locator('[data-studio-tab="design"]').click();
+  await expect(page.locator('#studio-pane-design')).toBeVisible();
+  await expect(page.locator('#studio-preview-frame')).toBeVisible();
+  await page.frameLocator('#studio-preview-frame').locator('.site-header').waitFor();
+  await page.locator('[name="lightHeader"]').fill('#dac4c7');
+  await expect.poll(async () => page.frameLocator('#studio-preview-frame').locator('.site-header').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(218, 196, 199)');
+  await page.locator('#studio-mobile-view').click();
+  await expect(page.locator('#studio-preview-shell')).toHaveClass(/mobile/);
+  await page.locator('[data-studio-tab="photos"]').click();
+  await expect(page.locator('#studio-pane-photos')).toBeVisible();
+  const sample = await page.evaluate(() => {
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = 30;
+    const context = cv.getContext('2d');
+    context.fillStyle = '#b75866';
+    context.fillRect(0,0,30,30);
+    return cv.toDataURL('image/png').split(',')[1];
+  });
+  await page.locator('#photo-source-file').setInputFiles({name:'product.png',mimeType:'image/png',buffer:Buffer.from(sample,'base64')});
+  await expect(page.locator('#photo-apply')).toBeEnabled();
+  await page.locator('#photo-zoom').evaluate(el=>{el.value='1.5';el.dispatchEvent(new Event('input',{bubbles:true}))});
+  await page.locator('#photo-apply').click();
+  await expect(page.locator('#studio-pane-products')).toBeVisible();
+  await expect(page.locator('#preview')).toHaveAttribute('src', /blob:/);
+  await expect(page.locator('#save')).toBeVisible();
+});
