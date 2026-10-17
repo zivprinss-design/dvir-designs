@@ -11,6 +11,7 @@ html:not([data-theme="dark"]) .theme-toggle .theme-icon-sun,html[data-theme="dar
  .site-header .nav-right,.site-header .nav-left{min-width:44px}
 }
 html[data-theme="dark"]{
+ background:#1c191d;
  color-scheme:dark;
  --cream:#1c191d;--pink:#ddb2b8;--header:#2d252b;--ink:#f7eff0;--stroke:#76626a;--muted:#d2c1c6;--card:#2b252b
 }
