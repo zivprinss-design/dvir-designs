@@ -16,8 +16,17 @@ test('Desktop catalog and visible navigation', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
-test('Phone layout, share review and customer name', async ({ page }) => {
+test('Phone layout, private optional contact and short cart sharing', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  let savedRequest=null,creationCount=0;
+  await page.context().route('**/rest/v1/rpc/dvir_create_short_cart',async route=>{
+    savedRequest=route.request().postDataJSON();creationCount++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify('AbCdEf1234')});
+  });
+  await page.context().route('**/rest/v1/rpc/dvir_open_short_cart',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',
+      body:JSON.stringify({name:savedRequest?.p_customer_name,items:savedRequest?.p_items})});
+  });
   await page.goto('/#pillows');
   await expect(page.locator('#products-grid .product-card').first()).toBeVisible();
   const overflows = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2);
@@ -28,6 +37,11 @@ test('Phone layout, share review and customer name', async ({ page }) => {
   await page.locator('#whatsapp-share').click();
   await expect(page.locator('#customer-name-error')).toBeVisible();
   await page.locator('#customer-name').fill('לקוחה לדוגמה');
+  await expect(page.locator('#customer-phone')).toBeVisible();
+  await page.locator('#customer-phone').fill('invalid-phone');
+  await page.locator('#whatsapp-share').click();
+  await expect(page.locator('#customer-phone-error')).toBeVisible();
+  await page.locator('#customer-phone').fill('050-1234567');
   await page.locator('#whatsapp-share').click();
   await expect(page.locator('#share-preview-dialog')).toBeVisible();
   await expect(page.locator('#share-preview-send')).toBeVisible();
@@ -38,11 +52,18 @@ test('Phone layout, share review and customer name', async ({ page }) => {
   await page.locator('#share-cart').click();
   await expect(page.locator('#share-link-box')).toBeVisible();
   const link = await page.locator('#share-link-input').inputValue();
-  expect(link).toContain('cart=');
+  expect(link).toMatch(/\\?s=AbCdEf1234$/);
+  expect(link).not.toContain('050');
+  expect(savedRequest.p_phone).toBe('0501234567');
+  expect(savedRequest.p_customer_name).toBe('לקוחה לדוגמה');
+  expect(savedRequest.p_items.length).toBeGreaterThan(0);
+  await page.locator('#share-cart').click();
+  expect(creationCount).toBe(1);
   const receiver = await page.context().newPage();
   await receiver.goto(link);
   await expect(receiver.locator('#cart-panel')).toHaveClass(/is-open/);
   await expect(receiver.locator('#customer-name')).toHaveValue('לקוחה לדוגמה');
+  await expect(receiver.locator('#customer-phone')).toHaveValue('');
   await receiver.close();
   await page.keyboard.press('Escape');
   await expect(page.locator('#cart-panel')).not.toHaveClass(/is-open/);
@@ -99,4 +120,39 @@ test('Studio design preview and local photo cropping do not require publishing t
   await expect(page.locator('#studio-pane-products')).toBeVisible();
   await expect(page.locator('#preview')).toHaveAttribute('src', /blob:/);
   await expect(page.locator('#save')).toBeVisible();
+});
+
+test('Optional phone may be empty and admin inbox UI renders securely', async ({ page })=>{
+  let saved=null;
+  await page.context().route('**/rest/v1/rpc/dvir_create_short_cart',async route=>{
+    saved=route.request().postDataJSON();
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify('MnOpQr5678')});
+  });
+  await page.goto('/#pillows');
+  await expect(page.locator('.product-card').first()).toBeVisible();
+  await page.locator('.product-add').first().click();
+  await page.locator('#cart-trigger').click();
+  await page.locator('#customer-name').fill('לקוח ללא טלפון');
+  await page.locator('#share-cart').click();
+  await expect(page.locator('#share-link-input')).toHaveValue(/\\?s=MnOpQr5678$/);
+  expect(saved.p_phone).toBeNull();
+  await page.goto('/admin.html');
+  await expect(page.locator('#login-screen')).toBeVisible();
+  await expect(page.locator('#studio-pane-inbox')).toBeHidden();
+  await page.evaluate(()=>{
+    document.querySelector('#dashboard').classList.remove('hidden');
+    window.DVIR_ADMIN_DB={
+      from:()=>{
+        const rows=[{code:'MnOpQr5678',customer_name:'לקוח ללא טלפון',phone:null,
+          status:'new',created_at:new Date().toISOString(),items:[['p1','45×45',1,null]]}];
+        return {select:()=>({order:()=>({limit:async()=>({data:rows,error:null})})}),
+          update:()=>({eq:async()=>({error:null})})};
+      }
+    };
+  });
+  await page.locator('[data-studio-tab="inbox"]').click();
+  await expect(page.locator('#inbox-list .inbox-entry')).toHaveCount(1);
+  await page.locator('#inbox-list .inbox-entry').click();
+  await expect(page.locator('#inbox-detail')).toContainText('לקוח ללא טלפון');
+  await expect(page.locator('#inbox-detail')).toContainText('הלקוח לא הזין מספר טלפון');
 });
