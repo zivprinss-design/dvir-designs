@@ -345,6 +345,9 @@ function cleanProductImage(p){
       const image=new Image();
       image.onload=()=>{
         try{
+          // Images already cropped in the repository must never be cropped twice.
+          if(image.naturalWidth===crop[2]&&image.naturalHeight===crop[3]){resolve(source);return}
+          if(image.naturalWidth<crop[0]+crop[2]||image.naturalHeight<crop[1]+crop[3]){resolve(source);return}
           const canvas=document.createElement('canvas');canvas.width=crop[2];canvas.height=crop[3];
           canvas.getContext('2d').drawImage(image,...crop,0,0,crop[2],crop[3]);
           canvas.toBlob(blob=>resolve(blob?URL.createObjectURL(blob):source),'image/webp',.90);
