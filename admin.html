@@ -65,9 +65,11 @@ html[data-theme="dark"] .admin-preview-dialog #admin-preview-content{background:
 @media(max-width:700px){.admin-bulk-bar{padding:9px;gap:7px}.admin-bulk-bar button{min-height:41px}}
 </style>
 <link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="studio.css">
 <script src="config.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 <script src="admin.js" defer></script>
+<script src="studio.js" defer></script>
 </head>
 <body class="admin-page">
 <header><div><h1>ניהול DVIR DESIGNS</h1><span>קטלוג · תמונות · מחירים · מלאי</span></div><div class="line"><button type="button" class="theme-toggle" id="theme-toggle" aria-label="מעבר למצב כהה" title="מעבר למצב כהה">
@@ -81,6 +83,12 @@ html[data-theme="dark"] .admin-preview-dialog #admin-preview-content{background:
   <p id="login-status" role="status" class="status"></p>
  </section>
  <section id="dashboard" class="hidden">
+  <nav class="studio-tabs" aria-label="תחומי ניהול">
+    <button type="button" data-studio-tab="products" class="active" aria-selected="true">מוצרים ומלאי</button>
+    <button type="button" data-studio-tab="design" aria-selected="false">עיצוב האתר</button>
+    <button type="button" data-studio-tab="photos" aria-selected="false">עורך תמונות</button>
+  </nav>
+  <div id="studio-pane-products" class="studio-pane">
   <div class="bar"><input id="search" type="search" placeholder="חיפוש לפי שם / מספר דגם"><select id="category-filter"><option value="">כל הקטגוריות</option><option value="pillows">כריות</option><option value="curtains">וילונות</option><option value="tables">מפות</option></select><button id="new-product" type="button">+ הוספת מוצר</button><button id="refresh" type="button">רענון</button></div>
   <div class="admin-bulk-bar"><label class="admin-select-all"><input id="select-all-visible" type="checkbox"> בחירת כל המוצרים המוצגים</label><button id="bulk-show" type="button" disabled>הצגת נבחרים</button><button id="bulk-hide" type="button" disabled>הסתרת נבחרים</button><span id="selected-count" aria-live="polite">לא נבחרו מוצרים</span></div>
   <div class="layout">
@@ -97,12 +105,94 @@ html[data-theme="dark"] .admin-preview-dialog #admin-preview-content{background:
       <label>תמונות נוספות של אותו מוצר (כתובת HTTPS בכל שורה)<textarea name="extraImages" id="extra-images" rows="3" placeholder="https://..."></textarea></label>
       <label>העלאת תמונות נוספות (עד 5 בבת אחת)<input id="multi-image-upload" accept="image/jpeg,image/png,image/webp" type="file" multiple></label>
       <div id="additional-image-preview" class="additional-image-preview" aria-label="תמונות המוצר הנוספות"></div>
-      <div class="line"><img alt="תצוגה מקדימה" id="preview" class="thumb"><span class="admin-note">תמונות חדשות נשמרות בענן Supabase. התמונות מהאתר המקורי נשארות בתיקיית assets.</span></div>
+      <div class="line"><img alt="תצוגה מקדימה" id="preview" class="thumb"><span class="admin-note">תמונות חדשות נשמרות בענן Supabase. התמונות מהאתר המקורי נשארות בתיקיית assets.</span><button id="open-photo-editor" type="button">חיתוך ועריכת תמונה</button></div>
       <label class="line"><input id="active" type="checkbox" checked>המוצר מוצג באתר</label>
       <div class="line"><button id="preview-edits" type="button">תצוגה מקדימה</button><button id="save" type="submit">שמירת השינויים</button><span role="status" class="status" id="save-status"></span></div>
     </form>
    </section>
   </div>
+  </div>
+  <section id="studio-pane-design" class="studio-pane" hidden>
+    <div class="studio-intro"><div><h2>סטודיו לעיצוב האתר</h2><p class="muted">התאמת צבעים, טיפוגרפיה, פריסה, פינות ותוכן האתר. התצוגה כאן היא טיוטה בלבד; רק שמירה מפרסמת שינוי לכל הלקוחות.</p></div>
+      <span class="studio-mini-tag">השינויים חלים על האתר ללא פריסה מחדש</span></div>
+    <div class="studio-design-layout">
+      <form id="studio-design-form" class="panel studio-design-form" autocomplete="off">
+        <div class="studio-presets" aria-label="ערכות עיצוב">
+          <button type="button" data-design-preset="original">קלאסי מקורי</button>
+          <button type="button" data-design-preset="rose">ורוד יוקרתי</button>
+          <button type="button" data-design-preset="sage">ירוק מרווה</button>
+          <button type="button" data-design-preset="pearl">פנינה</button>
+          <button type="button" data-design-preset="noir">לילה עמוק</button>
+        </div>
+        <fieldset class="studio-fieldset"><legend>צבעי מצב בהיר</legend><div class="studio-colors"><label>רקע האתר<span class="studio-color-line"><input type="color" name="lightBackground" aria-label="רקע האתר"><output data-color-for="lightBackground"></output></span></label>
+<label>רקע הכותרת<span class="studio-color-line"><input type="color" name="lightHeader" aria-label="רקע הכותרת"><output data-color-for="lightHeader"></output></span></label>
+<label>כפתורים והדגשות<span class="studio-color-line"><input type="color" name="lightAccent" aria-label="כפתורים והדגשות"><output data-color-for="lightAccent"></output></span></label>
+<label>טקסט ראשי<span class="studio-color-line"><input type="color" name="lightText" aria-label="טקסט ראשי"><output data-color-for="lightText"></output></span></label>
+<label>רקע כרטיסים<span class="studio-color-line"><input type="color" name="lightCard" aria-label="רקע כרטיסים"><output data-color-for="lightCard"></output></span></label>
+<label>מסגרות<span class="studio-color-line"><input type="color" name="lightBorder" aria-label="מסגרות"><output data-color-for="lightBorder"></output></span></label></div></fieldset>
+<fieldset class="studio-fieldset"><legend>צבעי מצב כהה</legend><div class="studio-colors"><label>רקע כהה<span class="studio-color-line"><input type="color" name="darkBackground" aria-label="רקע כהה"><output data-color-for="darkBackground"></output></span></label>
+<label>כותרת כהה<span class="studio-color-line"><input type="color" name="darkHeader" aria-label="כותרת כהה"><output data-color-for="darkHeader"></output></span></label>
+<label>הדגשות כהות<span class="studio-color-line"><input type="color" name="darkAccent" aria-label="הדגשות כהות"><output data-color-for="darkAccent"></output></span></label>
+<label>טקסט כהה<span class="studio-color-line"><input type="color" name="darkText" aria-label="טקסט כהה"><output data-color-for="darkText"></output></span></label>
+<label>רקע כרטיסים<span class="studio-color-line"><input type="color" name="darkCard" aria-label="רקע כרטיסים"><output data-color-for="darkCard"></output></span></label>
+<label>מסגרות כהות<span class="studio-color-line"><input type="color" name="darkBorder" aria-label="מסגרות כהות"><output data-color-for="darkBorder"></output></span></label></div></fieldset>
+        <fieldset class="studio-fieldset"><legend>פונטים וטיפוגרפיה</legend><div class="studio-two">
+        <label>פונט כללי<select name="font"><option>Assistant</option><option>Heebo</option><option>Rubik</option><option>Alef</option><option>Frank Ruhl Libre</option></select></label>
+        <label>פונט לכותרות<select name="headingFont"><option>Heebo</option><option>Assistant</option><option>Rubik</option><option>Alef</option><option>Frank Ruhl Libre</option></select></label>
+        </div></fieldset>
+        <fieldset class="studio-fieldset"><legend>פריסה, גדלים ומרווחים</legend><div class="studio-ranges"><label>גודל טקסט כללי<span class="studio-range-line"><input name="fontScale" type="range" min="85" max="125" step="1"><output data-range-for="fontScale" data-suffix=" %"></output></span></label>
+<label>מספר מוצרים בשורה במחשב<span class="studio-range-line"><input name="desktopColumns" type="range" min="3" max="5" step="1"><output data-range-for="desktopColumns" data-suffix=""></output></span></label>
+<label>מרווח בין מוצרים<span class="studio-range-line"><input name="productGap" type="range" min="10" max="40" step="1"><output data-range-for="productGap" data-suffix=" px"></output></span></label>
+<label>עיגול פינות הכרטיסים<span class="studio-range-line"><input name="cardRadius" type="range" min="0" max="35" step="1"><output data-range-for="cardRadius" data-suffix=" px"></output></span></label>
+<label>עיגול פינות התמונות<span class="studio-range-line"><input name="imageRadius" type="range" min="0" max="35" step="1"><output data-range-for="imageRadius" data-suffix=" px"></output></span></label>
+<label>עיגול פינות הכפתורים<span class="studio-range-line"><input name="buttonRadius" type="range" min="0" max="35" step="1"><output data-range-for="buttonRadius" data-suffix=" px"></output></span></label>
+<label>גובה הכותרת במחשב<span class="studio-range-line"><input name="headerHeight" type="range" min="78" max="140" step="1"><output data-range-for="headerHeight" data-suffix=" px"></output></span></label></div><div class="studio-two">
+        <label>חיתוך תמונות בקטלוג<select name="imageFit"><option value="cover">ממלא את המסגרת (חיתוך לפי הצורך)</option><option value="contain">כל התמונה בתוך המסגרת</option></select></label>
+        <label>יחס תמונות<select name="imageRatio"><option value="square">ריבוע 1:1</option><option value="portrait">לאורך 4:5</option><option value="landscape">לרוחב 5:4</option></select></label>
+        </div></fieldset>
+        <fieldset class="studio-fieldset"><legend>כותרות וטקסטים</legend><div class="studio-two"><label>כותרת דף הבית<input name="homeTitle" maxlength="110"></label>
+<label>כותרת המשנה<input name="homeSubtitle" maxlength="110"></label>
+<label>שם קטגוריית הכריות<input name="pillowsTitle" maxlength="110"></label>
+<label>שם קטגוריית הווילונות<input name="curtainsTitle" maxlength="110"></label>
+<label>שם קטגוריית המפות<input name="tablesTitle" maxlength="110"></label>
+<label>טקסט תחתון<input name="footerText" maxlength="110"></label></div></fieldset>
+        <div class="studio-design-actions">
+          <button type="submit" id="studio-publish" class="studio-publish">שמירה ופרסום באתר</button>
+          <button type="button" id="studio-revert">חזרה לגרסה השמורה</button>
+          <button type="button" id="studio-reset">חזרה לעיצוב המקורי</button>
+        </div>
+        <p class="status" id="studio-design-status" role="status" aria-live="polite"></p>
+      </form>
+      <section class="panel studio-live-preview">
+        <div class="studio-preview-top"><strong>תצוגה מקדימה חיה</strong><div><button type="button" id="studio-desktop-view" class="active">מחשב</button><button type="button" id="studio-mobile-view">טלפון</button></div></div>
+        <p class="admin-note">אפשר לגלול בתוך התצוגה, לעבור בין קטגוריות ולבדוק גם מצב כהה. שינויי העיצוב לא יפורסמו לפני שמירה.</p>
+        <div id="studio-preview-shell" class="studio-preview-shell desktop"><iframe id="studio-preview-frame" title="תצוגה מקדימה של הקטלוג" src="/#pillows" loading="lazy"></iframe></div>
+        <a href="/" target="_blank" rel="noopener noreferrer">פתיחת האתר בלשונית חדשה ↗</a>
+      </section>
+    </div>
+  </section>
+  <section id="studio-pane-photos" class="studio-pane" hidden>
+    <div class="studio-intro"><div><h2>עורך תמונות המוצרים</h2><p class="muted">חיתוך מדויק, יחס תמונה, סיבוב, היפוך, בהירות, ניגודיות ורוויה. לא נוצר תוכן חדש בתמונה ולא משנים את הדגם.</p></div></div>
+    <div class="panel photo-edit-workspace">
+      <div class="photo-edit-controls">
+        <strong>מקור התמונה</strong>
+        <p class="admin-note">ניתן להשתמש בתמונה הראשית של המוצר הנבחר ב״מוצרים ומלאי״, או לטעון קובץ מהמחשב. תמונות חיצוניות מסוימות אינן מאפשרות עריכה בגלל הגבלות האתר המקורי.</p>
+        <div class="line"><button type="button" id="photo-load-current">תמונה ראשית של המוצר</button><label class="photo-upload-button">בחירת תמונה מהמחשב<input id="photo-source-file" type="file" accept="image/jpeg,image/png,image/webp"></label></div>
+        <label>יחס חיתוך<select id="photo-ratio"><option value="1">ריבוע 1:1</option><option value="0.8">לאורך 4:5</option><option value="1.25">לרוחב 5:4</option><option value="original">יחס מקורי</option></select></label>
+        <label>הגדלה וחיתוך <output data-photo-label="zoom"></output><input id="photo-zoom" type="range" min="1" max="3" value="1" step=".05"></label>
+        <label>מיקום אופקי <output data-photo-label="x"></output><input id="photo-x" type="range" min="0" max="100" value="50"></label>
+        <label>מיקום אנכי <output data-photo-label="y"></output><input id="photo-y" type="range" min="0" max="100" value="50"></label>
+        <label>סיבוב<select id="photo-rotate"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>
+        <label class="photo-toggle"><input id="photo-flip" type="checkbox"> היפוך אופקי</label>
+        <label>בהירות <output data-photo-label="brightness"></output><input id="photo-brightness" type="range" min="60" max="140" value="100"></label>
+        <label>ניגודיות <output data-photo-label="contrast"></output><input id="photo-contrast" type="range" min="60" max="140" value="100"></label>
+        <label>רוויה <output data-photo-label="saturation"></output><input id="photo-saturation" type="range" min="0" max="160" value="100"></label>
+        <div class="line"><button type="button" id="photo-reset">איפוס עריכה</button><button type="button" id="photo-apply" class="studio-publish" disabled>החל כתמונה ראשית של המוצר</button></div>
+        <p class="status" id="photo-status" role="status"></p>
+      </div>
+      <div class="photo-canvas-wrap"><p class="admin-note">התצוגה המקדימה מתעדכנת כשמשנים את המחוונים.</p><canvas id="photo-canvas" width="500" height="500" aria-label="תצוגה מקדימה של חיתוך התמונה"></canvas><p class="admin-note">לאחר ״החל״, יש ללחוץ על ״שמירת השינויים״ בטופס המוצר כדי לפרסם את התמונה.</p></div>
+    </div>
+  </section>
  </section>
 </main>
 <dialog id="admin-preview-dialog" class="admin-preview-dialog" aria-labelledby="admin-preview-title">
