@@ -18,13 +18,14 @@ const DEFAULTS={
  lightBackground:'#f7f1ee',lightHeader:'#f4e5e2',lightAccent:'#f4d0ce',lightText:'#2e2929',lightCard:'#fffaf8',lightBorder:'#c0a6a0',
  darkBackground:'#1c191d',darkHeader:'#2d252b',darkAccent:'#ddb2b8',darkText:'#f7eff0',darkCard:'#2b252b',darkBorder:'#76626a',
  font:'Assistant',headingFont:'Heebo',fontScale:100,desktopColumns:4,productGap:22,cardRadius:14,imageRadius:10,imageFit:'cover',imageRatio:'square',
- buttonRadius:11,headerHeight:96,homeTitle:'קולקציות הטקסטיל שלנו',homeSubtitle:'עיצוב יוקרתי לאירועים מיוחדים',
+ buttonRadius:11,headerHeight:96,logoHeight:82,heroTitleSize:54,
+ logoUrl:'assets/logo.png',homePillowsImage:'assets/home-pillows.jpg',homeCurtainsImage:'assets/home-curtains.jpg',homeTablesImage:'assets/home-tables.jpg',homeTitle:'קולקציות הטקסטיל שלנו',homeSubtitle:'עיצוב יוקרתי לאירועים מיוחדים',
  pillowsTitle:'קטלוג כריות',curtainsTitle:'קטלוג וילונות',tablesTitle:'קטלוג מפות',footerText:'LUXURY TEXTILES FOR EVENTS'
 };
 const normalized=v=>{const d={...DEFAULTS};if(!v||typeof v!=='object')return d;
  for(const key of Object.keys(d)){const val=v[key],orig=d[key];
   if(typeof orig==='number'){if(Number.isFinite(Number(val)))d[key]=Number(val)}
-  else if(typeof val==='string'&&val.length<150)d[key]=val;}
+  else if(typeof val==='string'&&val.length<(key.endsWith('Image')||key==='logoUrl'?501:150))d[key]=val;}
  return d};
 const presets={
  original:{},
@@ -116,9 +117,28 @@ form.addEventListener('submit',async e=>{
   const {data:admin,error:adminError}=await db.rpc('dvir_is_admin');
   if(adminError||admin!==true)throw Error('נדרשת כניסת מנהל מורשה');
   draft=readForm();
+  const imageUploads=[...form.querySelectorAll('[data-brand-upload]')];
+  for(const input of imageUploads){
+    const file=input.files?.[0];if(!file)continue;
+    if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>5*1024*1024)throw Error('לכל תמונת מיתוג נדרש קובץ PNG/JPG/WebP בגודל עד 5MB');
+    const type=file.type==='image/jpeg'?'jpg':file.type==='image/png'?'png':'webp';
+    const safeName=input.dataset.brandUpload.replace(/[^a-zA-Z0-9]/g,'');
+    const random=crypto.randomUUID().slice(0,8);
+    const path='branding/'+safeName+'-'+Date.now()+'-'+random+'.'+type;
+    const {error:uploadError}=await db.storage.from('dvir-product-images').upload(path,file,{contentType:file.type,upsert:false});
+    if(uploadError)throw uploadError;
+    draft[safeName]=db.storage.from('dvir-product-images').getPublicUrl(path).data.publicUrl;
+  }
+  for(const key of ['logoUrl','homePillowsImage','homeCurtainsImage','homeTablesImage']){
+    const value=draft[key];
+    if(typeof value!=='string'||value.length>500||!(value.startsWith('https://')||/^assets\/[a-zA-Z0-9_./+%()\-]+$/.test(value)))throw Error('קישור תמונה לא תקין: '+key);
+  }
   const {error}=await db.from('dvir_site_settings').upsert({id:'site',data:draft,updated_at:new Date().toISOString()},{onConflict:'id'});
   if(error)throw error;
-  saved={...draft};formDirty=false;status('העיצוב פורסם! השינויים יופיעו ללקוחות בטעינה מחדש.',true);
+  saved={...draft};formDirty=false;
+  for(const input of form.querySelectorAll('[data-brand-upload]'))input.value='';
+  fillForm(saved);
+  status('העיצוב פורסם! השינויים יופיעו ללקוחות בטעינה מחדש.',true);
  }catch(e){status('שמירה נכשלה: '+(e.message||String(e)),false)}
  finally{button.disabled=false}
 });
