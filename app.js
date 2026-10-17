@@ -50,7 +50,7 @@ const html=s=>String(s??'').replace(/[&<>"']/g,t=>({'&':'&amp;','<':'&lt;','>':'
 const storageKey='dvir_figma_cart_v1';
 const offersStorageKey='dvir_customer_price_offers_v1';
 const cartKey=(id,size)=>JSON.stringify([id,size]);
-let cart={},current='home',category='pillows',sizeFilter='',search='',page=1,lastSharedToken='';
+let cart={},current='home',category='pillows',sizeFilter='',search='',page=1,lastSharedToken='',lastShareCode='',pendingShare=null;
 let toastTimer;
 function loadCart(){try{return JSON.parse(localStorage.getItem(storageKey)||'{}')}catch{return {}}}
 function saveCart(){try{localStorage.setItem(storageKey,JSON.stringify(cart))}catch{}}
@@ -213,8 +213,8 @@ function updateCartSummary(){
     ? 'הסכום כולל הצעות מחיר שלך. מוצרים ללא הצעה אינם נכללים בסכום. כל הצעה כפופה לאישור העסק.'
     :proposed?'הסכום כולל הצעות מחיר שהזנת — אלה אינן מחירים שאושרו על ידי העסק.'
     :'יש מוצרים ללא מחיר קבוע וללא הצעה, ולכן הם אינם נכללים בסכום.';
-  if(!$('share-link-box').hidden&&lastSharedToken!==encodeShare()){
-    $('share-link-box').hidden=true;lastSharedToken='';
+  if(!$('share-link-box').hidden&&lastSharedToken!==shareFingerprint()){
+    $('share-link-box').hidden=true;lastSharedToken='';lastShareCode='';
   }
 }
 function renderCart(){const rows=cartRows(),n=count();$('cart-count').textContent=n;$('cart-count').hidden=!n;$('basket-number').textContent=n?'('+n+')':'';
@@ -286,23 +286,89 @@ function requireCustomerName(){
   field.value=name;
   return name;
 }
+function customerPhone(){
+  return $('customer-phone').value.trim().replace(/[\\s()\\-]/g,'');
+}
+function requireValidPhone(){
+  const phone=customerPhone(),field=$('customer-phone');
+  const valid=!phone||/^\\+?[0-9]{7,15}$/.test(phone);
+  $('customer-phone-error').hidden=valid;
+  field.setAttribute('aria-invalid',valid?'false':'true');
+  if(!valid){field.focus();toast('הזן מספר טלפון תקין או השאר את השדה ריק');return null}
+  return phone;
+}
+function clearVisibleShare(){
+  $('share-link-box').hidden=true;
+  lastSharedToken='';lastShareCode='';
+}
 $('customer-name').addEventListener('input',()=>{
   $('customer-name-error').hidden=true;
   $('customer-name').removeAttribute('aria-invalid');
-  $('share-link-box').hidden=true;
-  lastSharedToken='';
+  clearVisibleShare();
 });
+$('customer-phone').addEventListener('input',()=>{
+  $('customer-phone-error').hidden=true;
+  $('customer-phone').removeAttribute('aria-invalid');
+  clearVisibleShare();
+});
+function shareItems(){
+ return cartRows().map(({p,size,qty,key})=>[p.key,size,qty,p.price==null?(priceOffers[key]??null):null]);
+}
+function shareFingerprint(){
+ return JSON.stringify([shareItems(),customerName(),customerPhone()]);
+}
 function encodeShare(){
   // Version 3 includes the customer's name and optional price offers; old v1/v2 links still work.
-  const items=cartRows().map(({p,size,qty,key})=>[p.key,size,qty,p.price==null?(priceOffers[key]??null):null]);
+  const items=shareItems();
   const bytes=new TextEncoder().encode(JSON.stringify([3,items,customerName()]));
   let s='';for(const b of bytes)s+=String.fromCharCode(b);
   return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
-function createCartShareUrl(){
-  const url=new URL(location.href);
-  url.hash='#all';url.searchParams.set('cart',encodeShare());
+function createCartShareUrl(code){
+  const url=new URL('/',location.origin);
+  url.searchParams.set('s',code);
   return url;
+}
+async function getShortShareUrl(){
+  const name=requireCustomerName();if(!name)throw Error('חובה להזין שם לקוח');
+  const phone=requireValidPhone();if(phone===null)throw Error('מספר טלפון לא תקין');
+  if(location.protocol==='file:'||location.protocol==='about:')throw Error('יש לפרסם את האתר כדי לשתף');
+  if(!dbEnabled)throw Error('הקישורים הקצרים אינם זמינים כרגע');
+  const fingerprint=shareFingerprint();
+  if(lastShareCode&&lastSharedToken===fingerprint)return createCartShareUrl(lastShareCode);
+  if(pendingShare)return pendingShare;
+  pendingShare=(async()=>{
+    const response=await fetch(apiRoot+'/rest/v1/rpc/dvir_create_short_cart',{
+      method:'POST',headers:{apikey:backend.supabaseAnonKey,'Content-Type':'application/json'},
+      body:JSON.stringify({p_customer_name:name,p_phone:phone||null,p_items:shareItems()})
+    });
+    if(!response.ok)throw Error('שמירת הבקשה נכשלה. נסה שוב בעוד רגע.');
+    const code=await response.json();
+    if(typeof code!=='string'||!/^[A-Za-z0-9_-]{10}$/.test(code))throw Error('השרת החזיר קישור לא תקין');
+    lastShareCode=code;lastSharedToken=fingerprint;
+    return createCartShareUrl(code);
+  })();
+  try{return await pendingShare}finally{pendingShare=null}
+}
+async function decodeShortShare(code){
+  if(!dbEnabled)throw Error('unavailable');
+  if(!/^[A-Za-z0-9_-]{10}$/.test(code))throw Error('invalid');
+  const response=await fetch(apiRoot+'/rest/v1/rpc/dvir_open_short_cart',{
+    method:'POST',headers:{apikey:backend.supabaseAnonKey,'Content-Type':'application/json'},
+    body:JSON.stringify({p_code:code})
+  });
+  if(!response.ok)throw Error('unavailable');
+  const stored=await response.json();
+  if(!stored||!Array.isArray(stored.items))throw Error('missing');
+  const quantities={},offers={};
+  for(const item of stored.items){
+    if(!Array.isArray(item)||item.length!==4)continue;
+    const [id,size,qty,offer]=item,key=cartKey(id,size);
+    quantities[key]=qty;
+    if(offer!=null)offers[key]=offer;
+  }
+  const shared=sanitiseCart(quantities);
+  return {cart:shared,offers:sanitiseOffers(offers,shared),customerName:normalizeCustomerName(stored.name)};
 }
 function decodeShare(token){
   if(!token||token.length>20000)throw Error('invalid');
@@ -464,22 +530,22 @@ $('cart-list').addEventListener('click',e=>{const b=e.target.closest('[data-acti
 $('cart-list').addEventListener('click',e=>{const b=e.target.closest('.cart-photo-trigger[data-zoom]');if(b)openZoom(b.dataset.zoom)});
 $('share-cart').addEventListener('click',async()=>{
   if(!count())return;
-  if(!requireCustomerName())return;
-  const url=createCartShareUrl(),token=url.searchParams.get('cart');
-  lastSharedToken=token;
-  $('share-link-box').hidden=false;
-  $('share-link-input').value=url.href;
-  const locally=location.protocol==='file:'||location.protocol==='about:';
-  $('share-hint').textContent=locally
-    ? 'זוהי הדגמה מקומית בלבד. כדי לשלוח את הסל למישהו אחר, יש לפרסם את האתר ואז ליצור שוב קישור.'
-    : 'זהו קישור לסל שבחרתם, ללא תשלום. מי שיפתח אותו יראה את שם הלקוח, הפריטים והכמויות באתר.';
-  if(locally){toast('הקישור נוצר להדגמה. לשיתוף אמיתי יש לפרסם את האתר.');return;}
-  const ok=await copy(url.href);
-  toast(ok?'הקישור לסל נוצר והועתק':'הקישור מוכן להעתקה');
+  if(!requireCustomerName()||requireValidPhone()===null)return;
+  const button=$('share-cart');button.disabled=true;
+  try{
+    const url=await getShortShareUrl();
+    $('share-link-box').hidden=false;
+    $('share-link-input').value=url.href;
+    $('share-hint').textContent='הקישור הקצר מוכן. הבקשה נשמרה בתיבת הדואר של העסק. הטלפון, אם הוזן, אינו גלוי בקישור.';
+    const ok=await copy(url.href);
+    toast(ok?'קישור קצר נוצר והועתק':'הקישור הקצר מוכן להעתקה');
+  }catch(e){toast(e.message||'לא ניתן ליצור קישור כרגע')}
+  finally{button.disabled=false}
 });
 const sharePreview=$('share-preview-dialog');
 $('whatsapp-share').addEventListener('click',()=>{
   if(!count()||!requireCustomerName())return;
+  if(requireValidPhone()===null)return;
   $('share-preview-text').textContent=cartDescription();
   sharePreview.showModal();
   $('share-preview-send').focus();
@@ -491,18 +557,26 @@ sharePreview.addEventListener('click',e=>{if(e.target===sharePreview)closeShareP
 sharePreview.addEventListener('close',()=>{
   if($('whatsapp-share').isConnected)$('whatsapp-share').focus({preventScroll:true});
 });
-$('share-preview-send').addEventListener('click',()=>{
-  if(!count()||!requireCustomerName())return;
-  if(location.protocol==='file:'||location.protocol==='about:'){
-    toast('שיתוף WhatsApp זמין באתר שפורסם');return;
-  }
-  const url=createCartShareUrl();
-  const full=cartDescription()+'\n\nלצפייה בסל באתר: '+url.href;
-  const short='DVIR DESIGNS — בקשת הצעת מחיר\nשם הלקוח: '+customerName()
-    +'\nדגמים בסל: '+new Set(cartRows().map(({p})=>p.key)).size
-    +'\nלצפייה בפריטים ובכמויות: '+url.href;
-  window.open('https://wa.me/?text='+encodeURIComponent(full.length<=3300?full:short),'_blank','noopener,noreferrer');
-  closeSharePreview();
+$('share-preview-send').addEventListener('click',async()=>{
+  if(!count()||!requireCustomerName()||requireValidPhone()===null)return;
+  const button=$('share-preview-send');button.disabled=true;
+  // Open within the user gesture so browsers do not block a popup after the API request.
+  const popup=window.open('about:blank','_blank');
+  if(popup)popup.opener=null;
+  try{
+    const url=await getShortShareUrl();
+    const full=cartDescription()+'\n\nלצפייה בסל באתר: '+url.href;
+    const short='DVIR DESIGNS — בקשת הצעת מחיר\nשם הלקוח: '+customerName()
+      +'\nדגמים בסל: '+new Set(cartRows().map(({p})=>p.key)).size
+      +'\nלצפייה בפריטים ובכמויות: '+url.href;
+    const destination='https://wa.me/?text='+encodeURIComponent(full.length<=3300?full:short);
+    if(popup)popup.location.href=destination;
+    else window.location.href=destination;
+    closeSharePreview();
+  }catch(e){
+    if(popup)popup.close();
+    toast(e.message||'לא ניתן לשתף כרגע');
+  }finally{button.disabled=false}
 });
 $('copy-share-link').addEventListener('click',async()=>{
   const link=$('share-link-input').value;if(!link)return;
@@ -516,8 +590,18 @@ $('copy-cart').addEventListener('click',async()=>{
 });
 window.addEventListener('hashchange',readHash);
 readHash();renderCart();
-const shared=new URLSearchParams(location.search).get('cart');
-if(shared){try{const decoded=decodeShare(shared);cart=decoded.cart;priceOffers=decoded.offers;$('customer-name').value=decoded.customerName;saveCart();saveOffers();renderCart();openCart();toast('הסל המשותף נטען')}catch(e){toast('לא ניתן לפתוח את קישור הסל')}}
+const searchParams=new URLSearchParams(location.search);
+const shared=searchParams.get('cart'),shortCode=searchParams.get('s');
+if(shared||shortCode){
+ try{
+  const decoded=shortCode?await decodeShortShare(shortCode):decodeShare(shared);
+  cart=decoded.cart;priceOffers=decoded.offers;
+  $('customer-name').value=decoded.customerName;
+  // Never import or reveal a customer's phone through a shared link.
+  $('customer-phone').value='';
+  saveCart();saveOffers();renderCart();openCart();toast('הסל המשותף נטען');
+ }catch(e){toast('לא ניתן לפתוח את קישור הסל')}
+}
 
 if(dbEnabled){
   const updateCatalogNotice=()=>{
