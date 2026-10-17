@@ -106,6 +106,12 @@
     <div class="cart-bottom">
       <div class="total-line"><span>סכום ביניים (כולל הצעות)</span><strong id="total">₪0</strong></div>
       <p id="pricing-note" class="cart-disclaimer" hidden>הצעות מחיר הן של הלקוח וטרם אושרו על ידי העסק.</p>
+      <div class="customer-identification">
+        <label for="customer-name">שם הלקוח <span aria-hidden="true">*</span></label>
+        <input id="customer-name" name="customer-name" type="text" required maxlength="80" autocomplete="name" placeholder="יש להזין שם לפני שיתוף הסל" aria-describedby="customer-name-error customer-name-help">
+        <p id="customer-name-error" role="alert" class="customer-name-error" hidden>חובה להזין שם לקוח לפני שיתוף הסל.</p>
+        <p id="customer-name-help" class="customer-name-help">השם יופיע בהודעת WhatsApp ובקישור לסל. אין צורך להירשם.</p>
+      </div>
       <button class="pink-button full" type="button" id="share-cart">סיום ויצירת קישור לסל <span aria-hidden="true">↗</span></button>
       <button class="outline-button full" type="button" id="whatsapp-share" disabled>שיתוף הסל ב־WhatsApp ↗</button>
       <div class="share-link-box" id="share-link-box" hidden>
