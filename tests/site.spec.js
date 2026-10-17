@@ -71,7 +71,9 @@ test('Studio design preview and local photo cropping do not require publishing t
   await expect(page.locator('#studio-pane-design')).toBeVisible();
   await expect(page.locator('#studio-preview-frame')).toBeVisible();
   await page.frameLocator('#studio-preview-frame').locator('.site-header').waitFor();
+  await expect(page.locator('#studio-design-status')).toContainText('נטען');
   await page.locator('[name="lightHeader"]').fill('#dac4c7');
+  await expect(page.locator('[name="lightHeader"]')).toHaveValue('#dac4c7');
   await expect.poll(async () => page.frameLocator('#studio-preview-frame').locator('.site-header').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(218, 196, 199)');
   await page.locator('#studio-mobile-view').click();
   await expect(page.locator('#studio-preview-shell')).toHaveClass(/mobile/);
