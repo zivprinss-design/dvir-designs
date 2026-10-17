@@ -94,7 +94,22 @@ function drawDetails(req){
    statusActions.append(button);
  }
  root.append(statusActions);
- root.append($el('p','admin-note','טלפון שמסר הלקוח נועד ליצירת קשר לגבי בקשתו. אין כאן הזמנה ששולמה.'));
+ const danger=$el('button','inbox-delete-button','מחיקת הבקשה ופרטי הקשר');
+ danger.type='button';danger.addEventListener('click',()=>deleteRequest(req.code));
+ root.append(danger);
+ root.append($el('p','admin-note','טלפון שמסר הלקוח נועד ליצירת קשר לגבי בקשתו. אין כאן הזמנה ששולמה. אפשר למחוק את הבקשה לצמיתות כשאין בה עוד צורך.'));
+}
+async function deleteRequest(code){
+ const req=records.find(x=>x.code===code);
+ if(!req||!confirm('למחוק לצמיתות את בקשת הסל של '+req.customer_name+' ואת מספר הטלפון שנמסר? לא ניתן לבטל פעולה זו.'))return;
+ const db=window.DVIR_ADMIN_DB;
+ try{
+  const {error}=await db.from('dvir_cart_requests').delete().eq('code',code);
+  if(error)throw error;
+  records=records.filter(x=>x.code!==code);selectedCode=null;
+  $('inbox-detail').replaceChildren($el('p','muted','הבקשה נמחקה. בחר בקשה אחרת.'));
+  drawInbox();inboxMessage('הבקשה ופרטי הקשר נמחקו לצמיתות',true);
+ }catch(e){inboxMessage('לא ניתן למחוק את הבקשה: '+e.message)}
 }
 async function updateStatus(code,status,button){
  const db=window.DVIR_ADMIN_DB;
