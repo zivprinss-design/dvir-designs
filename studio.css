@@ -73,3 +73,12 @@ html[data-theme=dark] .photo-upload-button{background:#d5aeb7;color:#2b2027}
  .photo-edit-workspace{padding:14px;gap:16px}
 }
 @media(max-width:390px){.studio-tabs button{font-size:12px}.studio-fieldset{padding:12px 9px}.studio-design-actions button{flex:1 1 100%}}
+
+/* Brand image controls */
+.studio-brand-fields{display:grid;gap:12px}
+.studio-brand-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(185px,.75fr);gap:12px;align-items:end;border-bottom:1px solid #eadbd5;padding-bottom:12px}
+.studio-brand-row:last-child{border:0;padding-bottom:0}
+.studio-brand-row input[type=file]{font-size:12px;min-height:44px;padding:9px}
+.studio-brand-row input[type=text]{font-size:14px;min-height:44px}
+html[data-theme=dark] .studio-brand-row{border-bottom-color:#63515c}
+@media(max-width:700px){.studio-brand-row{grid-template-columns:minmax(0,1fr)}}
