@@ -36,9 +36,9 @@
 .studio-preview-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .studio-preview-top button{font-size:13px;padding:8px 12px}
 .studio-preview-top button.active{background:#deb2b0}
-.studio-preview-shell{background:#eee1df;border:1px solid #e0cdc6;border-radius:15px;padding:10px;display:flex;justify-content:center;overflow:hidden;max-width:100%;transition:padding .2s}
-.studio-preview-shell iframe{width:100%;min-height:650px;height:70vh;border:0;background:white;border-radius:9px}
-.studio-preview-shell.mobile iframe{width:390px;max-width:100%;min-height:620px;height:72vh;flex:none}
+.studio-preview-shell{background:#eee1df;border:1px solid #e0cdc6;border-radius:15px;padding:10px;position:relative;overflow:hidden;max-width:100%;min-height:220px;transition:height .2s}
+.studio-preview-shell iframe{position:absolute;top:10px;right:10px;width:var(--studio-frame-width,1280px);height:var(--studio-frame-height,900px);min-height:0;border:0;background:white;border-radius:9px;transform:scale(var(--studio-frame-scale,0.4));transform-origin:top right;max-width:none}
+.studio-preview-shell.mobile iframe{max-width:none;min-height:0}
 .photo-edit-workspace{display:grid;grid-template-columns:minmax(270px,390px) minmax(320px,1fr);gap:30px}
 .photo-edit-controls{display:flex;flex-direction:column;gap:13px}
 .photo-edit-controls label{font-size:14px}
@@ -59,7 +59,7 @@ html[data-theme=dark] .studio-color-line output,html[data-theme=dark] .photo-edi
 html[data-theme=dark] .studio-mini-tag{background:#39313a;color:#ecdae0;border-color:#78616c}
 html[data-theme=dark] .studio-preview-shell{background:#41333a;border-color:#75626a}
 html[data-theme=dark] .photo-upload-button{background:#d5aeb7;color:#2b2027}
-@media(max-width:1100px){.studio-design-layout,.photo-edit-workspace{grid-template-columns:1fr}.studio-live-preview,.photo-canvas-wrap{position:static}.studio-preview-shell iframe{height:65vh}}
+@media(max-width:1100px){.studio-design-layout,.photo-edit-workspace{grid-template-columns:1fr}.studio-live-preview,.photo-canvas-wrap{position:static}.studio-preview-shell iframe{height:var(--studio-frame-height,900px)}}
 @media(max-width:700px){
  .studio-tabs{gap:3px;padding:4px;margin-bottom:16px}
  .studio-tabs button{font-size:13px;min-height:45px;padding:7px 5px}
@@ -69,7 +69,7 @@ html[data-theme=dark] .photo-upload-button{background:#d5aeb7;color:#2b2027}
  .studio-presets{grid-template-columns:repeat(2,minmax(0,1fr))}
  .studio-design-actions button{flex:1 1 140px}
  .studio-preview-shell{padding:5px}
- .studio-preview-shell iframe{height:60vh;min-height:480px}
+ .studio-preview-shell iframe{height:var(--studio-frame-height,900px);min-height:0}
  .photo-edit-workspace{padding:14px;gap:16px}
 }
 @media(max-width:390px){.studio-tabs button{font-size:12px}.studio-fieldset{padding:12px 9px}.studio-design-actions button{flex:1 1 100%}}
