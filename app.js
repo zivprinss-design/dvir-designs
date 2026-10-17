@@ -2,6 +2,7 @@
 // The presentation is preserved from DVIR DESIGNS v10. Product data is not hardcoded.
 (async function startDvirDesigns(){
 let PRODUCTS = [];
+let catalogUsingBackup=false;
 const backend=window.DVIR_CONFIG || {};
 const dbEnabled=!!(backend.supabaseUrl && backend.supabaseAnonKey);
 const apiRoot=String(backend.supabaseUrl||'').replace(/\/$/,'');
@@ -17,7 +18,8 @@ async function fetchCatalog(){
       }finally{clearTimeout(timeout)}
       if(!r.ok)throw new Error('Database read failed ('+r.status+')');
       const rows=await r.json();
-      if(!Array.isArray(rows)||!rows.length)throw new Error('Database returned no active products');
+      if(!Array.isArray(rows))throw new Error('Invalid database response');
+      catalogUsingBackup=false;
       return rows.map(row=>row.data).filter(x=>x&&x.key).sort((a,b)=>{
         const order={pillows:0,curtains:1,tables:2};
         const group=(order[a.category]??99)-(order[b.category]??99);
@@ -25,6 +27,7 @@ async function fetchCatalog(){
         return group || number(a)-number(b);
       });
     }catch(error){
+      catalogUsingBackup=true;
       console.warn('Live catalog temporarily unavailable; using published catalog backup',error);
     }
   }
@@ -85,6 +88,7 @@ function show(view){for(const v of getAll('.view')){v.hidden=true;v.classList.re
   current=view;
   document.title=(view==='home'?'קולקציות הטקסטיל שלנו':'קטלוג '+(category==='pillows'?'כריות':category==='curtains'?'וילונות':category==='tables'?'מפות':'מוצרים'))+' · DVIR DESIGNS';
   window.scrollTo({top:0,behavior:'instant'});
+  updateBackToTop();
 }
 function changeLocation(type,updateHash=true){
   if(type==='home'){show('home')}
@@ -121,13 +125,13 @@ function filtered(){let result=PRODUCTS.filter(p=>category==='all'||p.category==
 function picture(p){return html(p.localImage||p.image||'')}
 function stockText(p,s){const n=p.stock?.[s];return n==null?'מלאי: יש לאמת מול העסק':`מלאי: ${Number(n)} ${html(p.unit||'יח׳')}`}
 function itemCaption(p){if(p.category==='pillows')return 'P-'+String(p.id).padStart(3,'0');if(p.label)return html(p.label);return html(p.title)}
-function renderCard(p){
+function renderCard(p,imagePriority=99){
  const priced=p.price!==null&&p.price!==undefined;
  const selected=p.sizes[0];
  const available=Boolean(picture(p));
  const showSizeSelector=p.category!=='curtains'&&p.sizes.length>1;
  const options=p.sizes.map(s=>`<option value="${html(s)}">${html(s)}</option>`).join('');
- const image=available?`<button type="button" class="product-photo-trigger" data-zoom="${html(p.key)}" title="הגדלת התמונה" aria-label="הגדלת תמונה של ${html(p.title)}"><img src="${picture(p)}" alt="${html(p.title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true;this.closest('.product-photo').classList.add('is-broken')"></button>`:'';
+ const image=available?`<button type="button" class="product-photo-trigger" data-zoom="${html(p.key)}" title="הגדלת התמונה" aria-label="הגדלת תמונה של ${html(p.title)}"><img src="${picture(p)}" alt="${html(p.title)}" loading="${imagePriority<4?'eager':'lazy'}" fetchpriority="${imagePriority<4?'high':'auto'}" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true;this.closest('.product-photo').classList.add('is-broken')"></button>`:'';
  const origin=p.category==='curtains'?'https://dvir-designs.squarespace.com/curtains':p.category==='tables'?'https://dvir-designs.squarespace.com/pillows-1':'';
  const unavailable=origin?`<a class="source-photo-link" href="${origin}" target="_blank" rel="noopener noreferrer">צפייה בקטלוג התמונות המקורי ↗</a>`:'';
  const subtitle=p.category==='curtains'&&p.height?`<span class="product-extra">גובה מרבי: ${p.height} מטר</span>`:'';
@@ -150,11 +154,19 @@ function promoteOriginalPictures(container){
   // Imported Figma-mapped local images are authoritative. No remote swaps.
 }
 
-function renderCatalog(){
+function renderCatalog(append=false){
   const rows=filtered(),perBatch=12,totalShown=Math.min(rows.length,page*perBatch);
   $('result-line').textContent=rows.length+' פריטים · מוצגים '+totalShown;
-  $('products-grid').innerHTML=rows.slice(0,totalShown).map(renderCard).join('');
-  hydrateCleanImages($('products-grid'));
+  const grid=$('products-grid'),shown=rows.slice(0,totalShown);
+  const currentCards=[...grid.querySelectorAll('.product-card[data-key]')];
+  const canAppend=append&&currentCards.length>0&&currentCards.length<shown.length
+    &&currentCards.every((el,i)=>el.dataset.key===shown[i].key);
+  if(canAppend){
+    grid.insertAdjacentHTML('beforeend',shown.slice(currentCards.length).map((p,i)=>renderCard(p,currentCards.length+i)).join(''));
+  }else{
+    grid.innerHTML=shown.map((p,i)=>renderCard(p,i)).join('');
+  }
+  hydrateCleanImages(grid);
   $('no-results').hidden=rows.length!==0;
   const remaining=rows.length-totalShown;
   $('pagination').innerHTML=remaining>0
@@ -223,8 +235,37 @@ function updateCartSize(key,newSize){
   delete cart[key];cart[newKey]=quantity;saveCart();saveOffers();renderCart();
   if(total>limit)toast('הכמות הותאמה למלאי הזמין');
 }
-function openCart(){renderCart();$('cart-scrim').hidden=false;$('cart-panel').classList.add('is-open');$('cart-panel').setAttribute('aria-hidden','false');document.body.classList.add('cart-open');$('close-cart').focus()}
-function closeCart(){ $('cart-panel').classList.remove('is-open');$('cart-panel').setAttribute('aria-hidden','true');$('cart-scrim').hidden=true;document.body.classList.remove('cart-open') }
+let cartFocusOrigin=null;
+function setPageInert(value){
+  $('main').inert=value;
+  document.querySelector('.site-header').inert=value;
+  document.querySelector('.footer').inert=value;
+}
+function openCart(){
+  if($('cart-panel').classList.contains('is-open'))return;
+  cartFocusOrigin=document.activeElement;
+  renderCart();
+  $('cart-scrim').hidden=false;
+  $('cart-panel').inert=false;
+  $('cart-panel').classList.add('is-open');
+  $('cart-panel').setAttribute('aria-hidden','false');
+  document.body.classList.add('cart-open');
+  setPageInert(true);
+  updateBackToTop();
+  $('close-cart').focus();
+}
+function closeCart(){
+  if(!$('cart-panel').classList.contains('is-open'))return;
+  $('cart-panel').classList.remove('is-open');
+  $('cart-panel').setAttribute('aria-hidden','true');
+  $('cart-panel').inert=true;
+  $('cart-scrim').hidden=true;
+  document.body.classList.remove('cart-open');
+  setPageInert(false);
+  updateBackToTop();
+  if(cartFocusOrigin?.isConnected)cartFocusOrigin.focus({preventScroll:true});
+  cartFocusOrigin=null;
+}
 function normalizeCustomerName(value){
   return String(value??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,80);
 }
@@ -350,10 +391,26 @@ $('products-grid').addEventListener('click',e=>{const b=e.target.closest('[data-
 $('products-grid').addEventListener('click',e=>{const button=e.target.closest('.product-photo-trigger[data-zoom]');if(button && !button.closest('.product-photo')?.classList.contains('is-broken'))openZoom(button.dataset.zoom)});
 $('pagination').addEventListener('click',e=>{
   if(!e.target.closest('[data-load-more]'))return;
-  page+=1;renderCatalog();
+  page+=1;renderCatalog(true);
 });
+const backToTop=$('back-to-top');
+function updateBackToTop(){
+  backToTop.hidden=current!=='catalog'||window.scrollY<560||$('cart-panel').classList.contains('is-open');
+}
+window.addEventListener('scroll',updateBackToTop,{passive:true});
+backToTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
 $('cart-trigger').addEventListener('click',openCart);$('close-cart').addEventListener('click',closeCart);$('cart-scrim').addEventListener('click',closeCart);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('cart-panel').classList.contains('is-open'))closeCart()});
+document.addEventListener('keydown',e=>{
+  if(!$('cart-panel').classList.contains('is-open')||$('image-lightbox').open)return;
+  if(e.key==='Escape'){closeCart();return}
+  if(e.key!=='Tab')return;
+  const focusable=[...$('cart-panel').querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+    .filter(el=>!el.hidden&&!el.closest('[hidden]')&&el.getClientRects().length);
+  if(!focusable.length)return;
+  const first=focusable[0],last=focusable[focusable.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+});
 $('cart-list').addEventListener('change',e=>{const field=e.target.closest('[data-cart-size]');if(field)updateCartSize(field.dataset.cartSize,field.value)});
 $('cart-list').addEventListener('input',e=>{
   const field=e.target.closest('[data-offer-for]');if(!field)return;
@@ -410,13 +467,20 @@ const shared=new URLSearchParams(location.search).get('cart');
 if(shared){try{const decoded=decodeShare(shared);cart=decoded.cart;priceOffers=decoded.offers;$('customer-name').value=decoded.customerName;saveCart();saveOffers();renderCart();openCart();toast('הסל המשותף נטען')}catch(e){toast('לא ניתן לפתוח את קישור הסל')}}
 
 if(dbEnabled){
-  $('catalog-disclaimer').textContent='פרטי המוצרים מתעדכנים ממערכת הניהול. המחיר והמלאי הסופיים כפופים לאישור העסק. ט.ל.ח';
+  const updateCatalogNotice=()=>{
+    $('catalog-disclaimer').textContent=catalogUsingBackup
+      ? 'לא ניתן כרגע לאמת נתונים מול מערכת הניהול. מוצג קטלוג גיבוי שעלול להיות לא מעודכן; יש לאשר כל מחיר ומלאי מול העסק. ט.ל.ח'
+      : 'פרטי המוצרים מתעדכנים ממערכת הניהול. המחיר והמלאי הסופיים כפופים לאישור העסק. ט.ל.ח';
+    $('catalog-disclaimer').classList.toggle('catalog-backup-warning',catalogUsingBackup);
+  };
+  updateCatalogNotice();
   document.querySelector('.cart-bottom .cart-disclaimer:last-child').textContent='קישור הסל מאפשר שיתוף רשימת מוצרים ואינו מהווה הזמנה או תשלום. המלאי עשוי להשתנות עד לאישור העסק.';
   const reload=async()=>{
     try{
       const newProducts=await fetchCatalog();
       PRODUCTS=newProducts;byKey=new Map(PRODUCTS.map(x=>[x.key,x]));
       cart=sanitiseCart(cart);priceOffers=sanitiseOffers(priceOffers);saveCart();saveOffers();
+      updateCatalogNotice();
       if(current==='catalog')renderCatalog();renderCart();
     }catch(e){console.warn('Catalog sync delayed',e)}
   };
