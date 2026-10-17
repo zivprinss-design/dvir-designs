@@ -287,11 +287,11 @@ function requireCustomerName(){
   return name;
 }
 function customerPhone(){
-  return $('customer-phone').value.trim().replace(/[\\s()\\-]/g,'');
+  return $('customer-phone').value.trim().replace(/[\s()-]/g,'');
 }
 function requireValidPhone(){
   const phone=customerPhone(),field=$('customer-phone');
-  const valid=!phone||/^\\+?[0-9]{7,15}$/.test(phone);
+  const valid=!phone||/^\+?[0-9]{7,15}$/.test(phone);
   $('customer-phone-error').hidden=valid;
   field.setAttribute('aria-invalid',valid?'false':'true');
   if(!valid){field.focus();toast('הזן מספר טלפון תקין או השאר את השדה ריק');return null}
