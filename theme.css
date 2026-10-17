@@ -170,3 +170,77 @@ html[data-theme="dark"] .customer-identification input:focus{outline-color:#dcb0
 html[data-theme="dark"] .catalog-backup-warning{background:#402d35;color:#ffe2e1;border-color:#98636d}
 html[data-theme="dark"] .back-to-top{background:#3a3037;color:#f7eff0;border-color:#8c717c}
 html[data-theme="dark"] .back-to-top:hover{background:#4b3944}
+
+/* Cart flow 2026 polish — numbered sections, clear order summary, mobile usability. */
+.cart-panel{width:min(520px,100%);background:#fffaf8}
+.cart-top{padding:21px 25px 17px;flex-shrink:0}
+.cart-top h2{font-size:25px;line-height:1.2}
+.cart-top-note{font-size:13px;line-height:1.45}
+.cart-items-title,.cart-summary-head,.cart-section-title{display:flex;align-items:center;gap:8px;font-size:14px;color:#493a36}
+.cart-items-title{padding:14px 24px 8px;flex-shrink:0}
+.cart-summary-head{margin-bottom:11px}
+.cart-section-title{margin-bottom:8px}
+.cart-items-title>span:first-child,.cart-summary-head>span,.cart-section-title>span{display:grid;place-items:center;width:26px;height:26px;border:1px solid #d3b4ae;background:#f8e9e5;color:#74574e;border-radius:50%;font-size:12px;font-weight:700;flex:none}
+.cart-items-aux{margin-inline-start:auto;color:#8b7770;font-size:12px}
+.cart-list{padding:2px 24px 12px;overscroll-behavior:contain}
+.cart-line{gap:15px;padding:16px 0}
+.cart-line strong{line-height:1.4}
+.cart-bottom{max-height:54dvh;padding:17px 24px max(24px,env(safe-area-inset-bottom));overscroll-behavior:contain}
+.cart-bottom .cart-overview{margin-bottom:9px}
+.cart-bottom .total-line{background:#fcf3f0;border:1px solid #ead5cd;border-radius:11px;padding:12px 14px;margin:0 0 8px}
+.cart-bottom .total-line span{font-weight:600;font-size:15px}
+.cart-bottom .total-line strong{font-size:22px;white-space:nowrap}
+.cart-bottom .customer-identification{margin:15px 0 11px;padding-top:12px;border-top:1px solid #eeded8}
+.cart-primary-actions{display:grid;grid-template-columns:1fr;gap:8px}
+.cart-primary-actions button{min-height:46px;margin:0!important}
+.cart-primary-actions #whatsapp-share{border-radius:11px;background:#eecbc7;color:#302728;border-color:#caa19b;font-weight:700}
+.cart-primary-actions #whatsapp-share:hover:not(:disabled){background:#e8bab6}
+.cart-copy-text{display:block;min-height:42px;margin:6px auto 0;padding:8px 10px;border:0;background:transparent;color:#785c54!important;text-decoration:underline;text-underline-offset:4px;font-size:13px}
+.cart-copy-text:hover{color:#332725!important}
+.cart-size-select{min-height:40px}
+.zoom-main{display:flex;align-items:center;justify-content:center;gap:8px}
+.zoom-main #zoom-image{max-width:calc(100% - 88px)}
+.zoom-main:has(.zoom-arrow[hidden]) #zoom-image{max-width:100%}
+.zoom-arrow{display:grid;place-items:center;flex:none;border:1px solid #cdb1aa;background:#fff7f4;color:#503b36;border-radius:50%;width:40px;height:40px;font-size:32px;line-height:1}
+.zoom-arrow:hover{background:#f1d1cb}
+.zoom-counter{text-align:center;margin:2px 0 0;font-size:12px;color:#76615b}
+.share-preview-dialog{position:fixed;inset:0;margin:auto;width:min(94vw,610px);max-height:91dvh;border:1px solid #d3b6af;border-radius:17px;background:#fffaf7;color:#312929;box-shadow:0 22px 85px #1d14223b;padding:24px;overflow-y:auto}
+.share-preview-dialog::backdrop{background:#1a1119a3}
+.share-preview-head{display:flex;align-items:start;justify-content:space-between;gap:15px}
+.share-preview-head h2{font-size:21px;font-weight:600;margin:0}
+#share-preview-close{width:40px;height:40px;min-width:40px;border-radius:50%;border:1px solid #d5bdb7;background:#f5e8e4;color:#3f3430;font-size:26px;line-height:1}
+.share-preview-hint{font-size:13px;line-height:1.5;color:#76615b}
+.share-preview-text{white-space:pre-wrap;overflow-wrap:anywhere;max-height:45dvh;overflow-y:auto;background:#f8efeb;border:1px solid #ead8d1;padding:14px;border-radius:11px;color:#3e3532;font:14px/1.7 'Assistant',Arial,sans-serif;direction:rtl}
+.share-preview-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.share-preview-actions button{flex:1 1 180px;margin:0;min-height:47px;font-size:15px}
+html[data-theme="dark"] .cart-items-title,html[data-theme="dark"] .cart-summary-head,html[data-theme="dark"] .cart-section-title{color:#f3e9ed}
+html[data-theme="dark"] .cart-items-aux{color:#bdaeb5}
+html[data-theme="dark"] .cart-items-title>span:first-child,html[data-theme="dark"] .cart-summary-head>span,html[data-theme="dark"] .cart-section-title>span{background:#42343c;color:#f9e9ef;border-color:#795d69}
+html[data-theme="dark"] .cart-bottom .total-line{background:#352b33;border-color:#65505c}
+html[data-theme="dark"] .cart-bottom .customer-identification{border-top-color:#63535e}
+html[data-theme="dark"] .cart-primary-actions #whatsapp-share{background:#ddb2b8;color:#281d24;border-color:#af8a93}
+html[data-theme="dark"] .cart-copy-text{color:#e1bac4!important}
+html[data-theme="dark"] .cart-copy-text:hover{color:#fff5f9!important}
+html[data-theme="dark"] .zoom-arrow{background:#392e35;color:#f6edf0;border-color:#806b76}
+html[data-theme="dark"] .zoom-counter{color:#d9bdc7}
+html[data-theme="dark"] .share-preview-dialog{background:#29232a;color:#f6edf0;border-color:#806b76}
+html[data-theme="dark"] #share-preview-close{background:#433640;color:#f6edf0;border-color:#806b76}
+html[data-theme="dark"] .share-preview-hint{color:#dbc3cb}
+html[data-theme="dark"] .share-preview-text{background:#362c34;color:#f6edf0;border-color:#765f6b}
+@media(max-width:700px){
+  .cart-top{padding:16px 18px 13px}
+  .cart-items-title{padding:10px 18px 6px;flex-wrap:wrap}
+  .cart-items-aux{font-size:11px}
+  .cart-list{padding:2px 17px 10px}
+  .cart-bottom{padding:13px 18px max(18px,env(safe-area-inset-bottom));max-height:min(56dvh,520px)}
+  .cart-bottom .total-line{padding:9px 12px}
+  .cart-bottom .total-line strong{font-size:20px}
+  .cart-size-select,.price-offer-input{min-height:44px;font-size:16px}
+  .share-preview-dialog{padding:17px;width:calc(100vw - 18px)}
+}
+@media(max-width:355px){
+  .cart-items-aux{display:none}
+  .cart-top h2{font-size:23px}
+  .share-preview-head h2{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){.zoom-arrow,.share-preview-dialog{transition:none}}
