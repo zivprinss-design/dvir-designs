@@ -7,15 +7,26 @@ const dbEnabled=!!(backend.supabaseUrl && backend.supabaseAnonKey);
 const apiRoot=String(backend.supabaseUrl||'').replace(/\/$/,'');
 async function fetchCatalog(){
   if(dbEnabled){
-    const r=await fetch(apiRoot+'/rest/v1/dvir_products?select=key,data,active&active=eq.true&order=key.asc&limit=1000',{
-      headers:{apikey:backend.supabaseAnonKey},cache:'no-store'});
-    if(!r.ok)throw new Error('Database read failed ('+r.status+')');
-    return (await r.json()).map(row=>row.data).filter(x=>x&&x.key).sort((a,b)=>{
-      const order={pillows:0,curtains:1,tables:2};
-      const group=(order[a.category]??99)-(order[b.category]??99);
-      const number=p=>Number(String(p.key).match(/\d+/)?.[0]??999999);
-      return group || number(a)-number(b);
-    });
+    try{
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),8000);
+      let r;
+      try{
+        r=await fetch(apiRoot+'/rest/v1/dvir_products?select=key,data,active&active=eq.true&order=key.asc&limit=1000',{
+          headers:{apikey:backend.supabaseAnonKey},cache:'no-store',signal:controller.signal});
+      }finally{clearTimeout(timeout)}
+      if(!r.ok)throw new Error('Database read failed ('+r.status+')');
+      const rows=await r.json();
+      if(!Array.isArray(rows)||!rows.length)throw new Error('Database returned no active products');
+      return rows.map(row=>row.data).filter(x=>x&&x.key).sort((a,b)=>{
+        const order={pillows:0,curtains:1,tables:2};
+        const group=(order[a.category]??99)-(order[b.category]??99);
+        const number=p=>Number(String(p.key).match(/\d+/)?.[0]??999999);
+        return group || number(a)-number(b);
+      });
+    }catch(error){
+      console.warn('Live catalog temporarily unavailable; using published catalog backup',error);
+    }
   }
   const r=await fetch('./products.json',{cache:'no-store'});
   if(!r.ok)throw new Error('Could not load catalog');
