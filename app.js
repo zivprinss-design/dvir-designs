@@ -215,10 +215,29 @@ function updateCartSize(key,newSize){
 }
 function openCart(){renderCart();$('cart-scrim').hidden=false;$('cart-panel').classList.add('is-open');$('cart-panel').setAttribute('aria-hidden','false');document.body.classList.add('cart-open');$('close-cart').focus()}
 function closeCart(){ $('cart-panel').classList.remove('is-open');$('cart-panel').setAttribute('aria-hidden','true');$('cart-scrim').hidden=true;document.body.classList.remove('cart-open') }
+function normalizeCustomerName(value){
+  return String(value??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,80);
+}
+function customerName(){return normalizeCustomerName($('customer-name').value)}
+function requireCustomerName(){
+  const name=customerName(),field=$('customer-name');
+  const missing=!name;
+  $('customer-name-error').hidden=!missing;
+  field.setAttribute('aria-invalid',missing?'true':'false');
+  if(missing){toast('יש להזין שם לקוח לפני שיתוף הסל');field.focus();return null}
+  field.value=name;
+  return name;
+}
+$('customer-name').addEventListener('input',()=>{
+  $('customer-name-error').hidden=true;
+  $('customer-name').removeAttribute('aria-invalid');
+  $('share-link-box').hidden=true;
+  lastSharedToken='';
+});
 function encodeShare(){
-  // Version 2 preserves optional customer offers per cart line. Version 1 links remain readable.
+  // Version 3 includes the customer's name and optional price offers; old v1/v2 links still work.
   const items=cartRows().map(({p,size,qty,key})=>[p.key,size,qty,p.price==null?(priceOffers[key]??null):null]);
-  const bytes=new TextEncoder().encode(JSON.stringify([2,items]));
+  const bytes=new TextEncoder().encode(JSON.stringify([3,items,customerName()]));
   let s='';for(const b of bytes)s+=String.fromCharCode(b);
   return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
@@ -232,22 +251,22 @@ function decodeShare(token){
   const b64=token.replace(/-/g,'+').replace(/_/g,'/');
   const bin=atob(b64.padEnd(Math.ceil(b64.length/4)*4,'='));
   const bytes=Uint8Array.from(bin,ch=>ch.charCodeAt(0));
-  const [version,items]=JSON.parse(new TextDecoder().decode(bytes));
-  if(![1,2].includes(version)||!Array.isArray(items)||items.length>300)throw Error('invalid');
+  const [version,items,name]=JSON.parse(new TextDecoder().decode(bytes));
+  if(![1,2,3].includes(version)||!Array.isArray(items)||items.length>300)throw Error('invalid');
   const quantities={},offers={};
   for(const item of items){
     if(!Array.isArray(item)||item.length<3)continue;
     const [id,size,n,offer]=item,key=cartKey(id,size);
     quantities[key]=Number(n);
-    if(version===2&&offer!=null)offers[key]=offer;
+    if(version>=2&&offer!=null)offers[key]=offer;
   }
   const sharedCart=sanitiseCart(quantities);
-  return {cart:sharedCart,offers:sanitiseOffers(offers,sharedCart)};
+  return {cart:sharedCart,offers:sanitiseOffers(offers,sharedCart),customerName:version===3?normalizeCustomerName(name):''};
 }
 async function copy(text){try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);return true}}catch(e){}
   const el=document.createElement('textarea');el.value=text;el.style.cssText='position:fixed;left:-2000px';document.body.appendChild(el);el.focus();el.select();let ok;try{ok=document.execCommand('copy')}catch(e){ok=false}el.remove();if(!ok)window.prompt('העתיקו את הטקסט:',text);return Boolean(ok)}
 function cartDescription(){
-  const parts=['DVIR DESIGNS — סל מוצרים',''];
+  const parts=['DVIR DESIGNS — סל מוצרים','שם הלקוח: '+customerName(),''];
   for(const {p,size,qty,key} of cartRows()){
     const unitPrice=p.price!=null?p.price:priceOffers[key];
     const price=unitPrice!=null?(p.price!=null?'מחיר: ':'הצעת הלקוח: ')+money(unitPrice)+' ליחידה, סה״כ '+money(unitPrice*qty):'ללא מחיר או הצעה';
@@ -344,6 +363,7 @@ $('cart-list').addEventListener('click',e=>{const b=e.target.closest('[data-acti
 $('cart-list').addEventListener('click',e=>{const b=e.target.closest('.cart-photo-trigger[data-zoom]');if(b)openZoom(b.dataset.zoom)});
 $('share-cart').addEventListener('click',async()=>{
   if(!count())return;
+  if(!requireCustomerName())return;
   const url=createCartShareUrl(),token=url.searchParams.get('cart');
   lastSharedToken=token;
   $('share-link-box').hidden=false;
@@ -351,16 +371,17 @@ $('share-cart').addEventListener('click',async()=>{
   const locally=location.protocol==='file:'||location.protocol==='about:';
   $('share-hint').textContent=locally
     ? 'זוהי הדגמה מקומית בלבד. כדי לשלוח את הסל למישהו אחר, יש לפרסם את האתר ואז ליצור שוב קישור.'
-    : 'זהו קישור לסל שבחרתם, ללא תשלום. מי שיפתח אותו יראה את הפריטים והכמויות באתר.';
+    : 'זהו קישור לסל שבחרתם, ללא תשלום. מי שיפתח אותו יראה את שם הלקוח, הפריטים והכמויות באתר.';
   if(locally){toast('הקישור נוצר להדגמה. לשיתוף אמיתי יש לפרסם את האתר.');return;}
   const ok=await copy(url.href);
   toast(ok?'הקישור לסל נוצר והועתק':'הקישור מוכן להעתקה');
 });
 $('whatsapp-share').addEventListener('click',()=>{
   if(!count())return;
+  const name=requireCustomerName();if(!name)return;
   if(location.protocol==='file:'||location.protocol==='about:'){toast('שיתוף WhatsApp זמין באתר שפורסם');return;}
   const url=createCartShareUrl();
-  const message='DVIR DESIGNS — בחרתי מוצרים בקטלוג. לצפייה בסל ובכמויות: '+url.href;
+  const message='DVIR DESIGNS — סל מוצרים\nשם הלקוח: '+name+'\nלצפייה בסל ובכמויות: '+url.href;
   window.open('https://wa.me/?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
 });
 $('copy-share-link').addEventListener('click',async()=>{
@@ -369,11 +390,14 @@ $('copy-share-link').addEventListener('click',async()=>{
   toast(ok?'הקישור הועתק':'ניתן לסמן ולהעתיק את הקישור בשדה');
 });
 $('share-link-input').addEventListener('focus',e=>e.target.select());
-$('copy-cart').addEventListener('click',async()=>toast(await copy(cartDescription())?'רשימת המוצרים הועתקה':'העתיקו את הרשימה מהחלון'));
+$('copy-cart').addEventListener('click',async()=>{
+  if(!count()||!requireCustomerName())return;
+  toast(await copy(cartDescription())?'רשימת המוצרים עם שם הלקוח הועתקה':'העתיקו את הרשימה מהחלון');
+});
 window.addEventListener('hashchange',readHash);
 readHash();renderCart();
 const shared=new URLSearchParams(location.search).get('cart');
-if(shared){try{const decoded=decodeShare(shared);cart=decoded.cart;priceOffers=decoded.offers;saveCart();saveOffers();renderCart();openCart();toast('הסל המשותף נטען')}catch(e){toast('לא ניתן לפתוח את קישור הסל')}}
+if(shared){try{const decoded=decodeShare(shared);cart=decoded.cart;priceOffers=decoded.offers;$('customer-name').value=decoded.customerName;saveCart();saveOffers();renderCart();openCart();toast('הסל המשותף נטען')}catch(e){toast('לא ניתן לפתוח את קישור הסל')}}
 
 if(dbEnabled){
   $('catalog-disclaimer').textContent='פרטי המוצרים מתעדכנים ממערכת הניהול. המחיר והמלאי הסופיים כפופים לאישור העסק.';
