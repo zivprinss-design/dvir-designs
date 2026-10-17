@@ -7,6 +7,7 @@ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){
   loginStatus.className='status err';$('login-form').querySelector('button').disabled=true;return;
 }
 const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+window.DVIR_ADMIN_DB=db;
 let products=[],editKey=null,editProduct=null,selectedKeys=new Set(),dragKey=null;
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const message=(el,s,ok=false)=>{el.textContent=s;el.className='status '+(ok?'ok':'err')};
@@ -31,7 +32,7 @@ function showExtraImages(obj){
   wrap.append(img);
  }
 }
-function selectProduct(key,duplicate=false){const row=products.find(r=>r.key===key);editKey=duplicate?null:(row?.key||null);editProduct=row?structuredClone(row.data):null;
+function selectProduct(key,duplicate=false){window.DVIR_ADMIN_PHOTO?.clear();const row=products.find(r=>r.key===key);editKey=duplicate?null:(row?.key||null);editProduct=row?structuredClone(row.data):null;
  if(duplicate&&editProduct){delete editProduct.id;delete editProduct.key;delete editProduct.sortOrder;}
  const obj=editProduct||{key:'',title:'',label:'',category:'pillows',price:null,color:'',unit:'יח׳',stock:{'יחידה':0},sizes:['יחידה'],localImage:''};
  $('editor-title').textContent=duplicate?'שכפול '+obj.title:row?'עריכת '+obj.title:'הוספת מוצר חדש';
@@ -178,7 +179,7 @@ $('editor').addEventListener('submit',async e=>{e.preventDefault();const form=$(
   if(urls.some(x=>!/^https:\/\//.test(x)&&!/^assets\//.test(x)))throw Error('תמונות נוספות חייבות להיות כתובות HTTPS או נתיבים קיימים בתיקיית assets');
   const obj={...(editProduct||{}),key,id:editProduct?.id??now,title:String(f.get('title')||'').trim(),label:String(f.get('label')||'').trim(),category:String(f.get('category')||''),color:String(f.get('color')||'').trim(),unit:String(f.get('unit')||'יח׳').trim(),price:f.get('price')===''?null:Number(f.get('price')),sizes,stock,images:[...new Set(urls)],sizeLabel:editProduct?.sizeLabel||'מידה'};
   if(!obj.title)throw Error('יש להזין שם מוצר');if(obj.price!=null&&(!Number.isFinite(obj.price)||obj.price<0))throw Error('מחיר לא תקין');
-  const file=$('image-upload').files?.[0];
+  const file=window.DVIR_ADMIN_PHOTO?.getFile() || $('image-upload').files?.[0];
   if(file){if(file.size>10*1024*1024||!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type))throw Error('התמונה חייבת להיות PNG/JPG/WebP/GIF עד 10MB');
     const ext=file.name.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g,'');const path=`${key}/${Date.now()}-${unique}.${ext}`;
     const {error}=await db.storage.from('dvir-product-images').upload(path,file,{contentType:file.type,upsert:false});if(error)throw error;
