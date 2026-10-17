@@ -400,7 +400,7 @@ const shared=new URLSearchParams(location.search).get('cart');
 if(shared){try{const decoded=decodeShare(shared);cart=decoded.cart;priceOffers=decoded.offers;$('customer-name').value=decoded.customerName;saveCart();saveOffers();renderCart();openCart();toast('הסל המשותף נטען')}catch(e){toast('לא ניתן לפתוח את קישור הסל')}}
 
 if(dbEnabled){
-  $('catalog-disclaimer').textContent='פרטי המוצרים מתעדכנים ממערכת הניהול. המחיר והמלאי הסופיים כפופים לאישור העסק.';
+  $('catalog-disclaimer').textContent='פרטי המוצרים מתעדכנים ממערכת הניהול. המחיר והמלאי הסופיים כפופים לאישור העסק. ט.ל.ח';
   document.querySelector('.cart-bottom .cart-disclaimer:last-child').textContent='קישור הסל מאפשר שיתוף רשימת מוצרים ואינו מהווה הזמנה או תשלום. המלאי עשוי להשתנות עד לאישור העסק.';
   const reload=async()=>{
     try{
