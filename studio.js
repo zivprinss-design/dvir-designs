@@ -33,7 +33,7 @@ const presets={
  pearl:{lightBackground:'#f9f5ed',lightHeader:'#f0e4d5',lightAccent:'#e3ceb7',lightText:'#453629',lightCard:'#fffdf8',lightBorder:'#c9b6a3'},
  noir:{lightBackground:'#f3f0ef',lightHeader:'#e1d9dd',lightAccent:'#cdbbc6',lightText:'#2b252a',lightCard:'#faf8fa',lightBorder:'#b6a4b1',darkBackground:'#161316',darkHeader:'#282128',darkAccent:'#c2a5b7'}
 };
-const form=$('studio-design-form');let saved=normalized(),draft=normalized(),previewTimer=null,frameReady=false;
+const form=$('studio-design-form');let saved=normalized(),draft=normalized(),previewTimer=null,frameReady=false,formDirty=false;
 const status=(message,ok)=>{const x=$('studio-design-status');x.textContent=message;x.className='status '+(ok?'ok':'err')};
 const colorKeys=['lightBackground','lightHeader','lightAccent','lightText','lightCard','lightBorder','darkBackground','darkHeader','darkAccent','darkText','darkCard','darkBorder'];
 function fillForm(values){
@@ -63,13 +63,13 @@ function sendPreview(){
  }
 }
 form.addEventListener('input',()=>{
- draft=readForm();decorateInputs();
+ formDirty=true;draft=readForm();decorateInputs();
  clearTimeout(previewTimer);previewTimer=setTimeout(sendPreview,80);
 });
 form.querySelectorAll('[data-design-preset]').forEach(button=>button.addEventListener('click',()=>{
  const key=button.dataset.designPreset;
  fillForm({...DEFAULTS,...(presets[key]||{})});
- button.classList.add('active');
+ formDirty=true;button.classList.add('active');
  status('ערכת העיצוב נטענה לתצוגה מקדימה. כדי לפרסם לחץ על ״שמירה ופרסום באתר״.',true);
 }));
 $('studio-preview-frame').addEventListener('load',()=>{frameReady=true;sendPreview()});
@@ -86,14 +86,15 @@ async function loadSaved(){
  try{
   const {data,error}=await db.from('dvir_site_settings').select('data').eq('id','site').maybeSingle();
   if(error)throw error;
-  saved=normalized(data?.data||DEFAULTS);fillForm(saved);
-  status('העיצוב השמור נטען. אפשר לערוך ולצפות לפני הפרסום.',true);
+  saved=normalized(data?.data||DEFAULTS);
+  if(!formDirty){fillForm(saved);status('העיצוב השמור נטען. אפשר לערוך ולצפות לפני הפרסום.',true)}
+  else status('העיצוב השמור נטען, והטיוטה שכבר ערכת לא נדרסה.',true);
  }catch(e){status('לא ניתן לטעון הגדרות עיצוב: '+e.message,false)}
 }
-$('studio-revert').addEventListener('click',()=>{fillForm(saved);status('חזרת לגרסה השמורה. לא פורסם שינוי.',true)});
+$('studio-revert').addEventListener('click',()=>{fillForm(saved);formDirty=false;status('חזרת לגרסה השמורה. לא פורסם שינוי.',true)});
 $('studio-reset').addEventListener('click',()=>{
  if(!confirm('לחזור לעיצוב המקורי בתצוגה המקדימה? השינוי לא יפורסם עד שתשמור.'))return;
- fillForm(DEFAULTS);status('העיצוב המקורי מוצג בטיוטה. יש לשמור כדי לפרסם.',true);
+ fillForm(DEFAULTS);formDirty=true;status('העיצוב המקורי מוצג בטיוטה. יש לשמור כדי לפרסם.',true);
 });
 form.addEventListener('submit',async e=>{
  e.preventDefault();const db=window.DVIR_ADMIN_DB,button=$('studio-publish');button.disabled=true;
@@ -105,10 +106,11 @@ form.addEventListener('submit',async e=>{
   draft=readForm();
   const {error}=await db.from('dvir_site_settings').upsert({id:'site',data:draft,updated_at:new Date().toISOString()},{onConflict:'id'});
   if(error)throw error;
-  saved={...draft};status('העיצוב פורסם! השינויים יופיעו ללקוחות בטעינה מחדש.',true);
+  saved={...draft};formDirty=false;status('העיצוב פורסם! השינויים יופיעו ללקוחות בטעינה מחדש.',true);
  }catch(e){status('שמירה נכשלה: '+(e.message||String(e)),false)}
  finally{button.disabled=false}
 });
+fillForm(DEFAULTS);
 loadSaved();
 
 // Photo editor: pixels only, no generative transformations.
