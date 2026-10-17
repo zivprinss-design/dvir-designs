@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ניהול הקטלוג · DVIR DESIGNS</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{font-family:Assistant,Arial,sans-serif;color:#302829;background:#f7f1ee}*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.6;cursor:wait}a{color:#654d46}
+header{padding:24px max(4vw,20px);background:#f4e5e2;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+header h1{font-size:26px;margin:0;font-weight:600}header span{font-size:13px;color:#705d58}main{max-width:1300px;padding:25px 20px 80px;margin:auto}
+.panel{padding:22px;background:white;border:1px solid #e6d4cf;border-radius:15px;box-shadow:0 5px 30px #5e30200b}
+h2{font-size:22px;margin:0 0 15px}p{line-height:1.45}label{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:600}input,select,textarea{border:1px solid #c8ada5;border-radius:9px;padding:10px 12px;min-width:0;background:#fff;color:#302829}textarea{min-height:88px}input[type="checkbox"]{width:17px;height:17px;min-width:17px}input[type="file"]{width:100%;font-size:13px}button,.button{padding:10px 18px;background:#ecc6c2;border:1px solid #b98e87;border-radius:10px;color:#302829;font-weight:600}button:hover{background:#e8bbb5}.muted{color:#756861}.err{color:#ad3939}.ok{color:#296a41}
+.login{width:min(500px,100%);margin:45px auto}.login .fields{display:grid;gap:12px}.line{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.hidden{display:none!important}
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.bar input{flex:1;min-width:180px}.bar select{min-width:150px}
+.layout{display:grid;grid-template-columns: minmax(300px,1fr) minmax(370px, 1.1fr);gap:20px;align-items:start}.listing{max-height:74vh;overflow:auto}.item{display:grid;grid-template-columns:62px 1fr auto;gap:12px;padding:9px;border:1px solid #eadbd5;border-radius:10px;margin:8px 0;align-items:center}.item img{width:62px;height:62px;object-fit:contain;background:#fffaf6;border-radius:8px}.item strong{display:block;font-weight:600}.item small{font-size:12px;color:#766f67}
+form.edit{display:grid;gap:13px}.fields2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.size-row{display:grid;grid-template-columns:1fr 100px auto;gap:8px;align-items:center;margin:7px 0}.size-row button{padding:8px 10px}
+.thumb{width:120px;height:120px;object-fit:contain;border-radius:12px;background:#f9f6f3;border:1px solid #e6d8d0}.status{min-height:24px;font-size:14px}.admin-note{font-size:13px;color:#786b67}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.listing{max-height:350px}}@media(max-width:500px){.fields2{grid-template-columns:1fr}.size-row{grid-template-columns:1fr 75px auto}}
+
+/* Mobile management view — matching the store color palette */
+@media (max-width: 700px) {
+ header {padding:16px 14px;gap:10px} header h1 {font-size:23px} header span {font-size:12px}
+ main {padding:16px 12px 48px}.panel {padding:17px 14px;border-radius:14px}
+ .login {margin:16px auto}.bar {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .bar input {grid-column:1/-1;min-width:0;width:100%}.bar select {grid-column:1/-1;min-width:0;width:100%}
+ .bar button {min-width:0;min-height:44px;padding:9px 8px}
+ .layout {grid-template-columns:minmax(0,1fr);gap:15px}.listing {max-height:320px}
+ .item {grid-template-columns:50px minmax(0,1fr) auto;gap:9px;margin:7px 0;padding:8px}
+ .item img {width:50px;height:50px}.item strong {overflow-wrap:anywhere;font-size:14px}.item small {overflow-wrap:anywhere}
+ .item button {padding:8px 10px;min-height:40px;font-size:13px}
+ .fields2 {grid-template-columns:minmax(0,1fr);gap:12px}
+ .size-row {grid-template-columns:minmax(0,1fr) 74px auto;gap:6px}
+ .size-row input {width:100%;padding:9px 7px}.size-row button {min-height:42px;padding:7px}
+ input,select,textarea {font-size:16px;max-width:100%}input[type="checkbox"] {font-size:initial}
+ form.edit button[type="submit"], #login-form button {min-height:44px}
+ .line {gap:9px} .thumb {width:88px;height:88px}
+}
+@media (max-width: 365px) {
+ .panel {padding:13px 10px}.item {grid-template-columns:45px minmax(0,1fr);gap:7px}
+ .item button {grid-column:2;justify-self:start}.item img {width:45px;height:45px}
+ .size-row {grid-template-columns:minmax(0,1fr) 65px;gap:5px}.size-row button {grid-column:1/-1;justify-self:start}
+}
+</style>
+<script src="config.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="admin.js" defer></script>
+</head>
+<body>
+<header><div><h1>ניהול DVIR DESIGNS</h1><span>קטלוג · תמונות · מחירים · מלאי</span></div><div class="line"><a href="/">↗ לאתר</a><button type="button" class="hidden" id="logout">התנתקות</button></div></header>
+<main>
+ <section class="panel login" id="login-screen">
+  <h2>כניסת מנהל</h2><p>הגישה לעדכון המוצרים מוגבלת למשתמשים שאושרו ב־Supabase. חשבונות מנהל לא נרשמים דרך האתר.</p>
+  <form id="login-form" class="fields"><label>כתובת אימייל<input id="email" type="email" autocomplete="username" required></label><label>סיסמה<input id="password" type="password" autocomplete="current-password" required></label><button type="submit">כניסה לניהול</button></form>
+  <p id="login-status" role="status" class="status"></p>
+ </section>
+ <section id="dashboard" class="hidden">
+  <div class="bar"><input id="search" type="search" placeholder="חיפוש לפי שם / מספר דגם"><select id="category-filter"><option value="">כל הקטגוריות</option><option value="pillows">כריות</option><option value="curtains">וילונות</option><option value="tables">מפות</option></select><button id="new-product" type="button">+ הוספת מוצר</button><button id="refresh" type="button">רענון</button></div>
+  <div class="layout">
+   <section class="panel listing"><h2>המוצרים <span id="count"></span></h2><div id="list"></div></section>
+   <section class="panel">
+    <h2 id="editor-title">עריכת מוצר</h2>
+    <form id="editor" class="edit">
+      <div class="fields2"><label>שם המוצר<input name="title" required maxlength="180"></label><label>מספר דגם / שם לתצוגה<input name="label" maxlength="180"></label></div>
+      <div class="fields2"><label>קטגוריה<select name="category"><option value="pillows">כריות</option><option value="curtains">וילונות</option><option value="tables">מפות</option></select></label><label>מחיר ₪ (אפשר להשאיר ריק)<input name="price" inputmode="decimal" type="number" min="0" step="0.01" placeholder="מחיר לפי הצעה"></label></div>
+      <div class="fields2"><label>צבע / תיאור קצר<input name="color" maxlength="250"></label><label>יחידת מידה<input name="unit" value="יח׳" maxlength="30"></label></div>
+      <div><label>מידות ומלאי לכל מידה</label><div id="sizes"></div><button id="add-size" type="button">+ מידה נוספת</button></div>
+      <label>כתובת תמונה (לא חובה אם מעלים)<input name="imageurl" type="url" placeholder="https://..."></label>
+      <label>העלאת תמונה חדשה<input id="image-upload" accept="image/jpeg,image/png,image/webp,image/gif" type="file"></label>
+      <div class="line"><img alt="תצוגה מקדימה" id="preview" class="thumb"><span class="admin-note">תמונות חדשות נשמרות בענן Supabase. התמונות מהאתר המקורי נשארות בתיקיית assets.</span></div>
+      <label class="line"><input id="active" type="checkbox" checked>המוצר מוצג באתר</label>
+      <div class="line"><button id="save" type="submit">שמירת השינויים</button><span role="status" class="status" id="save-status"></span></div>
+    </form>
+   </section>
+  </div>
+ </section>
+</main>
+</body>
+</html>
