@@ -44,6 +44,7 @@ let byKey = new Map(PRODUCTS.map(p=>[p.key,p]));
 const money=n=>'₪'+Number(n).toLocaleString('he-IL');
 const html=s=>String(s??'').replace(/[&<>"']/g,t=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[t]));
 const storageKey='dvir_figma_cart_v1';
+const offersStorageKey='dvir_customer_price_offers_v1';
 const cartKey=(id,size)=>JSON.stringify([id,size]);
 let cart={},current='home',category='pillows',sizeFilter='',search='',page=1,lastSharedToken='';
 let toastTimer;
@@ -58,6 +59,26 @@ function sanitiseCart(c){const result={};if(!c||typeof c!=='object')return resul
   }return result;
 }
 cart=sanitiseCart(loadCart());
+function normalizeOffer(value){
+  if(value==null||String(value).trim()==='')return null;
+  const number=Number(value);
+  if(!Number.isFinite(number)||number<=0||number>1000000)return null;
+  return Math.round(number*100)/100 || null;
+}
+function sanitiseOffers(values,forCart=cart){
+  const clean={};
+  if(!values||typeof values!=='object'||Array.isArray(values))return clean;
+  for(const [key,value] of Object.entries(values)){
+    if(!Object.prototype.hasOwnProperty.call(forCart,key))continue;
+    let id;try{[id]=JSON.parse(key)}catch{continue}
+    const p=byKey.get(id),offer=normalizeOffer(value);
+    if(p&&p.price==null&&offer!=null)clean[key]=offer;
+  }
+  return clean;
+}
+function loadOffers(){try{return JSON.parse(localStorage.getItem(offersStorageKey)||'{}')}catch{return {}}}
+function saveOffers(){try{localStorage.setItem(offersStorageKey,JSON.stringify(priceOffers))}catch{}}
+let priceOffers=sanitiseOffers(loadOffers());
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2700)}
 function show(view){for(const v of getAll('.view')){v.hidden=true;v.classList.remove('is-current')}
   const el=$('view-'+view);if(el){el.hidden=false;el.classList.add('is-current')}
@@ -141,19 +162,44 @@ function renderCatalog(){
 }
 function cartRows(){return Object.entries(cart).map(([key,qty])=>{const [id,size]=JSON.parse(key);return {p:byKey.get(id),size,qty,key}}).filter(x=>x.p)}
 function count(){return Object.values(cart).reduce((a,n)=>a+Number(n),0)}
+function offerControl(p,key){
+  if(p.price!=null)return '';
+  const value=priceOffers[key]==null?'':String(priceOffers[key]);
+  return '<label class="price-offer-label">הצעת המחיר שלך ליחידה (₪)'
+    +'<input type="number" class="price-offer-input" data-offer-for="'+html(key)+'" value="'+html(value)+'" placeholder="הזנת מחיר" min="0.01" max="1000000" step="0.01" inputmode="decimal" dir="ltr" aria-label="הצעת מחיר ליחידה עבור '+html(p.title)+'">'
+    +'</label>';
+}
+function itemPriceText(p,key,qty){
+  if(p.price!=null)return money(p.price*qty);
+  return priceOffers[key]!=null?'הצעתך: '+money(priceOffers[key]*qty)+' (ליחידה '+money(priceOffers[key])+')':'ללא מחיר קבוע — אפשר להציע מחיר';
+}
+function updateCartSummary(){
+  const rows=cartRows();
+  const total=rows.reduce((sum,{p,key,qty})=>sum+(p.price!=null?p.price:(priceOffers[key]??0))*qty,0);
+  const proposed=rows.some(({p,key})=>p.price==null&&priceOffers[key]!=null);
+  const missing=rows.some(({p,key})=>p.price==null&&priceOffers[key]==null);
+  $('total').textContent=money(Math.round(total*100)/100);
+  $('pricing-note').hidden=!(proposed||missing);
+  $('pricing-note').textContent=proposed&&missing
+    ? 'הסכום כולל הצעות מחיר שלך. מוצרים ללא הצעה אינם נכללים בסכום. כל הצעה כפופה לאישור העסק.'
+    :proposed?'הסכום כולל הצעות מחיר שהזנת — אלה אינן מחירים שאושרו על ידי העסק.'
+    :'יש מוצרים ללא מחיר קבוע וללא הצעה, ולכן הם אינם נכללים בסכום.';
+  if(!$('share-link-box').hidden&&lastSharedToken!==encodeShare()){
+    $('share-link-box').hidden=true;lastSharedToken='';
+  }
+}
 function renderCart(){const rows=cartRows(),n=count();$('cart-count').textContent=n;$('cart-count').hidden=!n;$('basket-number').textContent=n?'('+n+')':'';
-  $('cart-list').innerHTML=rows.length?rows.map(({p,size,qty,key})=>`<div class="cart-line"><button class="cart-photo-trigger" type="button" data-zoom="${html(p.key)}" title="הגדלת התמונה" aria-label="הגדלת תמונה של ${html(p.title)}"><img src="${picture(p)||'assets/placeholder.svg'}" onerror="this.onerror=null;this.src='assets/placeholder.svg'" alt=""></button><div><strong>${html(p.title)}</strong><div class="meta">${p.sizes.length>1?`<label class="sr-only" for="cart-size-${html(p.key)}">שינוי מידה</label><select class="cart-size-select" id="cart-size-${html(p.key)}" data-cart-size="${html(key)}">${p.sizes.map(z=>`<option value="${html(z)}" ${z===size?'selected':''}>${html(z)}</option>`).join('')}</select>`:p.category==='curtains'?'':html(size)}${p.category==='curtains'?'':' · '}${html(p.color)}</div><div class="price">${p.price!=null?money(p.price*qty):'מחיר לפי הצעה'}</div><div class="quantity-row"><button data-action="plus" data-key="${html(key)}" aria-label="הוספת יחידה">+</button><span>${qty}</span><button data-action="minus" data-key="${html(key)}" aria-label="הפחתת יחידה">−</button><button class="remove" data-action="remove" data-key="${html(key)}">הסרה</button></div></div></div>`).join(''):'<div class="cart-empty"><span class="symbol">♡</span>הסל ריק כרגע.<br>בחרו מוצרים מהקטלוג.</div>';
+  $('cart-list').innerHTML=rows.length?rows.map(({p,size,qty,key})=>`<div class="cart-line"><button class="cart-photo-trigger" type="button" data-zoom="${html(p.key)}" title="הגדלת התמונה" aria-label="הגדלת תמונה של ${html(p.title)}"><img src="${picture(p)||'assets/placeholder.svg'}" onerror="this.onerror=null;this.src='assets/placeholder.svg'" alt=""></button><div class="cart-product-details"><strong>${html(p.title)}</strong><div class="meta">${p.sizes.length>1?`<label class="sr-only" for="cart-size-${html(p.key)}">שינוי מידה</label><select class="cart-size-select" id="cart-size-${html(p.key)}" data-cart-size="${html(key)}">${p.sizes.map(z=>`<option value="${html(z)}" ${z===size?'selected':''}>${html(z)}</option>`).join('')}</select>`:p.category==='curtains'?'':html(size)}${p.category==='curtains'?'':' · '}${html(p.color)}</div><div class="price">${itemPriceText(p,key,qty)}</div>${offerControl(p,key)}<div class="quantity-row"><button data-action="plus" data-key="${html(key)}" aria-label="הוספת יחידה">+</button><span>${qty}</span><button data-action="minus" data-key="${html(key)}" aria-label="הפחתת יחידה">−</button><button class="remove" data-action="remove" data-key="${html(key)}">הסרה</button></div></div></div>`).join(''):'<div class="cart-empty"><span class="symbol">♡</span>הסל ריק כרגע.<br>בחרו מוצרים מהקטלוג.</div>';
   hydrateCleanImages($('cart-list'));
-  $('total').textContent=money(rows.reduce((t,{p,qty})=>t+(p.price||0)*qty,0));
-  $('pricing-note').hidden=!rows.some(({p})=>p.price==null);
+  updateCartSummary();
   $('share-cart').disabled=!rows.length;$('copy-cart').disabled=!rows.length;$('whatsapp-share').disabled=!rows.length;
-  if(!$('share-link-box').hidden && lastSharedToken!==encodeShare()){$('share-link-box').hidden=true;lastSharedToken='';}
+
 }
 function addToCart(id,s){const p=byKey.get(id);const exact=p?.stock?.[s];const max=exact==null?99:Number(exact);if(!max)return toast('הפריט אינו זמין במידה הזאת');
   const key=cartKey(id,s);if((cart[key]||0)>=max)return toast('הגעת לכמות המלאי המרבית');cart[key]=(cart[key]||0)+1;saveCart();renderCart();toast('המוצר נוסף לסל');
 }
 function changeQty(key,diff){if(!(key in cart))return;let [id,size]=JSON.parse(key);let p=byKey.get(id);if(!p)return;
-  const next=Math.min(p.stock[size]==null?99:Number(p.stock[size]),cart[key]+diff);if(next<=0)delete cart[key];else cart[key]=next;saveCart();renderCart()}
+  const next=Math.min(p.stock[size]==null?99:Number(p.stock[size]),cart[key]+diff);if(next<=0){delete cart[key];delete priceOffers[key];saveOffers()}else cart[key]=next;saveCart();renderCart()}
 function updateCartSize(key,newSize){
   if(!(key in cart))return;
   let id,oldSize;try{[id,oldSize]=JSON.parse(key)}catch{return}
@@ -162,21 +208,54 @@ function updateCartSize(key,newSize){
   const newKey=cartKey(id,newSize),limit=p.stock?.[newSize]==null?99:Number(p.stock[newSize]);
   if(limit<=0){toast('המידה שנבחרה אינה זמינה');renderCart();return}
   const previous=cart[newKey]||0,total=previous+cart[key],quantity=Math.min(limit,total);
-  delete cart[key];cart[newKey]=quantity;saveCart();renderCart();
+  const oldOffer=priceOffers[key];delete priceOffers[key];
+  if(p.price==null&&oldOffer!=null&&priceOffers[newKey]==null)priceOffers[newKey]=oldOffer;
+  delete cart[key];cart[newKey]=quantity;saveCart();saveOffers();renderCart();
   if(total>limit)toast('הכמות הותאמה למלאי הזמין');
 }
 function openCart(){renderCart();$('cart-scrim').hidden=false;$('cart-panel').classList.add('is-open');$('cart-panel').setAttribute('aria-hidden','false');document.body.classList.add('cart-open');$('close-cart').focus()}
 function closeCart(){ $('cart-panel').classList.remove('is-open');$('cart-panel').setAttribute('aria-hidden','true');$('cart-scrim').hidden=true;document.body.classList.remove('cart-open') }
-function encodeShare(){const raw=JSON.stringify([1,cartRows().map(({p,size,qty})=>[p.key,size,qty])]);const bytes=new TextEncoder().encode(raw);let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function encodeShare(){
+  // Version 2 preserves optional customer offers per cart line. Version 1 links remain readable.
+  const items=cartRows().map(({p,size,qty,key})=>[p.key,size,qty,p.price==null?(priceOffers[key]??null):null]);
+  const bytes=new TextEncoder().encode(JSON.stringify([2,items]));
+  let s='';for(const b of bytes)s+=String.fromCharCode(b);
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
 function createCartShareUrl(){
   const url=new URL(location.href);
   url.hash='#all';url.searchParams.set('cart',encodeShare());
   return url;
 }
-function decodeShare(token){if(!token||token.length>20000)throw Error('invalid');const b64=token.replace(/-/g,'+').replace(/_/g,'/');const bin=atob(b64.padEnd(Math.ceil(b64.length/4)*4,'='));const bytes=Uint8Array.from(bin,ch=>ch.charCodeAt(0));const [version,items]=JSON.parse(new TextDecoder().decode(bytes));if(version!==1||!Array.isArray(items)||items.length>300)throw Error('invalid');const value={};for(const [id,size,n] of items)value[cartKey(id,size)]=Number(n);return sanitiseCart(value)}
+function decodeShare(token){
+  if(!token||token.length>20000)throw Error('invalid');
+  const b64=token.replace(/-/g,'+').replace(/_/g,'/');
+  const bin=atob(b64.padEnd(Math.ceil(b64.length/4)*4,'='));
+  const bytes=Uint8Array.from(bin,ch=>ch.charCodeAt(0));
+  const [version,items]=JSON.parse(new TextDecoder().decode(bytes));
+  if(![1,2].includes(version)||!Array.isArray(items)||items.length>300)throw Error('invalid');
+  const quantities={},offers={};
+  for(const item of items){
+    if(!Array.isArray(item)||item.length<3)continue;
+    const [id,size,n,offer]=item,key=cartKey(id,size);
+    quantities[key]=Number(n);
+    if(version===2&&offer!=null)offers[key]=offer;
+  }
+  const sharedCart=sanitiseCart(quantities);
+  return {cart:sharedCart,offers:sanitiseOffers(offers,sharedCart)};
+}
 async function copy(text){try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);return true}}catch(e){}
   const el=document.createElement('textarea');el.value=text;el.style.cssText='position:fixed;left:-2000px';document.body.appendChild(el);el.focus();el.select();let ok;try{ok=document.execCommand('copy')}catch(e){ok=false}el.remove();if(!ok)window.prompt('העתיקו את הטקסט:',text);return Boolean(ok)}
-function cartDescription(){let parts=['DVIR DESIGNS — סל מוצרים',''];for(const {p,size,qty} of cartRows())parts.push(`${p.title} | ${p.color}${p.category==='curtains'?'':' | '+size} | כמות: ${qty} | ${p.price!=null?money(p.price*qty):'מחיר לפי הצעה'}`);parts.push('',`סכום ידוע: ${$('total').textContent}`,'המחירים והמלאי כפופים לאישור העסק.');return parts.join('\n')}
+function cartDescription(){
+  const parts=['DVIR DESIGNS — סל מוצרים',''];
+  for(const {p,size,qty,key} of cartRows()){
+    const unitPrice=p.price!=null?p.price:priceOffers[key];
+    const price=unitPrice!=null?(p.price!=null?'מחיר: ':'הצעת הלקוח: ')+money(unitPrice)+' ליחידה, סה״כ '+money(unitPrice*qty):'ללא מחיר או הצעה';
+    parts.push(p.title+' | '+p.color+(p.category==='curtains'?'':' | '+size)+' | כמות: '+qty+' | '+price);
+  }
+  parts.push('','סכום כולל מחירים ידועים והצעות: '+$('total').textContent,'הצעות הלקוח כפופות לאישור העסק; אין כאן תשלום או הזמנה מאושרת.');
+  return parts.join('\n');
+}
 // These four imported images were screenshots: remove phone bars on the client.
 // No other product images are cropped or changed.
 const cleanImageCrops={p174:[0,240,323,240],p175:[0,190,323,330],c26:[0,28,288,522],c48:[0,90,294,496]};
@@ -247,6 +326,20 @@ $('pagination').addEventListener('click',e=>{
 $('cart-trigger').addEventListener('click',openCart);$('close-cart').addEventListener('click',closeCart);$('cart-scrim').addEventListener('click',closeCart);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('cart-panel').classList.contains('is-open'))closeCart()});
 $('cart-list').addEventListener('change',e=>{const field=e.target.closest('[data-cart-size]');if(field)updateCartSize(field.dataset.cartSize,field.value)});
+$('cart-list').addEventListener('input',e=>{
+  const field=e.target.closest('[data-offer-for]');if(!field)return;
+  const key=field.dataset.offerFor;
+  let id;try{[id]=JSON.parse(key)}catch{return}
+  const p=byKey.get(id);
+  if(!p||p.price!=null||!(key in cart))return;
+  const offer=normalizeOffer(field.value);
+  if(offer==null)delete priceOffers[key];else priceOffers[key]=offer;
+  saveOffers();
+  const row=field.closest('.cart-product-details');
+  const amount=row?.querySelector('.price');
+  if(amount)amount.textContent=itemPriceText(p,key,cart[key]);
+  updateCartSummary();
+});
 $('cart-list').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;changeQty(b.dataset.key,b.dataset.action==='plus'?1:b.dataset.action==='minus'?-1:-100000)});
 $('cart-list').addEventListener('click',e=>{const b=e.target.closest('.cart-photo-trigger[data-zoom]');if(b)openZoom(b.dataset.zoom)});
 $('share-cart').addEventListener('click',async()=>{
@@ -280,7 +373,7 @@ $('copy-cart').addEventListener('click',async()=>toast(await copy(cartDescriptio
 window.addEventListener('hashchange',readHash);
 readHash();renderCart();
 const shared=new URLSearchParams(location.search).get('cart');
-if(shared){try{cart=decodeShare(shared);saveCart();renderCart();openCart();toast('הסל המשותף נטען')}catch(e){toast('לא ניתן לפתוח את קישור הסל')}}
+if(shared){try{const decoded=decodeShare(shared);cart=decoded.cart;priceOffers=decoded.offers;saveCart();saveOffers();renderCart();openCart();toast('הסל המשותף נטען')}catch(e){toast('לא ניתן לפתוח את קישור הסל')}}
 
 if(dbEnabled){
   $('catalog-disclaimer').textContent='פרטי המוצרים מתעדכנים ממערכת הניהול. המחיר והמלאי הסופיים כפופים לאישור העסק.';
@@ -289,7 +382,7 @@ if(dbEnabled){
     try{
       const newProducts=await fetchCatalog();
       PRODUCTS=newProducts;byKey=new Map(PRODUCTS.map(x=>[x.key,x]));
-      cart=sanitiseCart(cart);saveCart();
+      cart=sanitiseCart(cart);priceOffers=sanitiseOffers(priceOffers);saveCart();saveOffers();
       if(current==='catalog')renderCatalog();renderCart();
     }catch(e){console.warn('Catalog sync delayed',e)}
   };
