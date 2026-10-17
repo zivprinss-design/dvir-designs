@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="catalog-enhancements.css">
   <script src="config.js" defer></script>
   <script src="app.js" defer></script>
 </head>
@@ -72,14 +73,14 @@
             <button type="button" class="size-chip" data-size="60×60">60×60</button>
             <button type="button" class="size-chip" data-size="נקניק">נקניק</button>
           </div>
-          <label class="search-wrap"><span class="sr-only">חיפוש מוצר</span><svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="search-products" type="search" placeholder="חיפוש מוצר, צבע או מספר דגם..." autocomplete="off"></label>
         </div>
+          <label class="search-wrap"><span class="sr-only">חיפוש מוצר</span><svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="search-products" type="search" placeholder="חיפוש לפי דגם (P-174 / C-026), צבע או שם" autocomplete="off"></label>
       </div>
       <p class="result-line" id="result-line"></p>
       <p class="catalog-disclaimer" id="catalog-disclaimer">המחירים והמלאי כפופים לאישור העסק. תמונות המוצרים שמורות בקובצי האתר.</p>
       <div class="products-grid" id="products-grid" aria-live="polite"></div>
       <div class="no-results" id="no-results" hidden>לא נמצאו פריטים. נסו לשנות את החיפוש או הסינון.</div>
-      <div class="pagination" id="pagination" aria-label="מעבר בין עמודי הקטלוג"></div>
+      <div class="pagination" id="pagination" aria-label="טעינת מוצרים נוספים"></div>
       <div class="tables-empty" id="tables-empty" hidden>
         <img src="assets/home-tables.jpg" alt="שולחן עם מפה מעוצבת">
         <div><h2>קטלוג מפות</h2><p>טרם התקבלו נתוני מוצרים ומחירים מאומתים עבור המפות. עד להשלמת האימות, הקטלוג לא מציג דגמים או מחירים משוערים.</p><a href="https://dvir-designs.squarespace.com/" target="_blank" rel="noopener noreferrer" class="pink-button">לאתר המקורי ↗</a></div>
@@ -101,6 +102,7 @@
       <div class="total-line"><span>סכום ביניים</span><strong id="total">₪0</strong></div>
       <p id="pricing-note" class="cart-disclaimer" hidden>בחלק מהמוצרים המחיר אינו ידוע ולכן לא נכלל בסכום.</p>
       <button class="pink-button full" type="button" id="share-cart">סיום ויצירת קישור לסל <span aria-hidden="true">↗</span></button>
+      <button class="outline-button full" type="button" id="whatsapp-share" disabled>שיתוף הסל ב־WhatsApp ↗</button>
       <div class="share-link-box" id="share-link-box" hidden>
         <label for="share-link-input">קישור לשיתוף הסל</label>
         <div class="share-field"><input type="text" id="share-link-input" dir="ltr" readonly aria-label="קישור לשיתוף הסל"><button type="button" id="copy-share-link" class="share-copy">העתקה</button></div>
