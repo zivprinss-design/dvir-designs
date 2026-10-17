@@ -39,7 +39,7 @@ function cssFor(d){
  return `
  html:not([data-theme="dark"]){${light}}
  html[data-theme="dark"]{${dark}}
- body{font-size:calc(18px * ${d.fontScale}/100)}
+ body{font-size:${(18*d.fontScale/100).toFixed(2)}px}
  .home-intro h1,.catalog-intro h1{font-family:${fonts[d.headingFont]}}
  .product-photo{aspect-ratio:${ratio}!important;height:auto!important;border-radius:${d.imageRadius}px!important}
  .product-photo-trigger img{object-fit:${d.imageFit}!important}
@@ -50,8 +50,22 @@ function cssFor(d){
   .products-grid{grid-template-columns:repeat(${d.desktopColumns},minmax(0,1fr))!important}
   .header-inner{min-height:${d.headerHeight}px!important}
  }
- @media(max-width:700px){body{font-size:calc(16px * ${d.fontScale}/100)}}
+ @media(max-width:700px){body{font-size:${(16*d.fontScale/100).toFixed(2)}px}}
  html:not([data-theme="dark"]) .product-card{color:var(--ink)}
+ html:not([data-theme="dark"]) .product-photo,
+ html:not([data-theme="dark"]) .product-card .product-photo{background:var(--card)}
+ html[data-theme="dark"] .product-photo,
+ html[data-theme="dark"] .product-card .product-photo{background:var(--card)}
+ html:not([data-theme="dark"]) .pink-button,
+ html:not([data-theme="dark"]) .product-add{background:var(--pink)}
+ html[data-theme="dark"] .pink-button,
+ html[data-theme="dark"] .product-add{background:var(--pink)}
+ html:not([data-theme="dark"]) .kind.active,
+ html:not([data-theme="dark"]) .size-chip.active{background:var(--pink)}
+ html[data-theme="dark"] .kind.active,
+ html[data-theme="dark"] .size-chip.active{background:var(--pink)}
+ html:not([data-theme="dark"]) .product-photo{border-color:var(--stroke)}
+ html[data-theme="dark"] .product-photo{border-color:var(--stroke)}
  html[data-theme="dark"] .product-card{color:var(--ink)}
  html:not([data-theme="dark"]) .product-price{color:var(--ink)}
  html[data-theme="dark"] .product-price{color:var(--ink)}
@@ -59,7 +73,7 @@ function cssFor(d){
  html[data-theme="dark"] .site-header{background:var(--header)}
  `;
 }
-let current=normalize();
+let current=normalize(),previewed=false;
 function apply(input){
  current=normalize(input);
  let style=document.getElementById('dvir-live-design');
@@ -84,7 +98,7 @@ function apply(input){
 window.DVIR_DESIGN={defaults,normalize,apply,current:()=>({...current})};
 window.addEventListener('message',e=>{
  if(window.parent===window||e.source!==window.parent||e.origin!==location.origin)return;
- if(e.data?.type==='DVIR_DESIGN_PREVIEW')apply(e.data.settings);
+ if(e.data?.type==='DVIR_DESIGN_PREVIEW'){previewed=true;apply(e.data.settings)}
 });
 async function load(){
  const cfg=window.DVIR_CONFIG||{};
@@ -94,7 +108,7 @@ async function load(){
   const response=await fetch(url,{headers:{apikey:cfg.supabaseAnonKey},cache:'no-store'});
   if(!response.ok)throw Error('Settings HTTP '+response.status);
   const result=await response.json();
-  if(Array.isArray(result)&&result[0]?.data)apply(result[0].data);
+  if(!previewed&&Array.isArray(result)&&result[0]?.data)apply(result[0].data);
  }catch(err){console.warn('The published design stays active; live settings could not load',err)}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
