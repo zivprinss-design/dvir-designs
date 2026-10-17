@@ -178,6 +178,16 @@ function updateCartSummary(){
   const total=rows.reduce((sum,{p,key,qty})=>sum+(p.price!=null?p.price:(priceOffers[key]??0))*qty,0);
   const proposed=rows.some(({p,key})=>p.price==null&&priceOffers[key]!=null);
   const missing=rows.some(({p,key})=>p.price==null&&priceOffers[key]==null);
+  const distinctModels=new Set(rows.map(({p})=>p.key)).size;
+  const quantity=rows.reduce((sum,row)=>sum+row.qty,0);
+  $('cart-overview').textContent=rows.length
+    ? distinctModels+' דגמים · '+quantity+' יחידות בסל'
+    : 'הסל ריק';
+  $('cart-total-label').textContent=proposed&&missing
+    ? 'סכום חלקי משוער'
+    : proposed?'סכום משוער (כולל הצעות)'
+    : missing?'סכום חלקי — מחירים ידועים'
+    :'סכום ביניים';
   $('total').textContent=money(Math.round(total*100)/100);
   $('pricing-note').hidden=!(proposed||missing);
   $('pricing-note').textContent=proposed&&missing
@@ -189,7 +199,7 @@ function updateCartSummary(){
   }
 }
 function renderCart(){const rows=cartRows(),n=count();$('cart-count').textContent=n;$('cart-count').hidden=!n;$('basket-number').textContent=n?'('+n+')':'';
-  $('cart-list').innerHTML=rows.length?rows.map(({p,size,qty,key})=>`<div class="cart-line"><button class="cart-photo-trigger" type="button" data-zoom="${html(p.key)}" title="הגדלת התמונה" aria-label="הגדלת תמונה של ${html(p.title)}"><img src="${picture(p)||'assets/placeholder.svg'}" onerror="this.onerror=null;this.src='assets/placeholder.svg'" alt=""></button><div class="cart-product-details"><strong>${html(p.title)}</strong><div class="meta">${p.sizes.length>1?`<label class="sr-only" for="cart-size-${html(p.key)}">שינוי מידה</label><select class="cart-size-select" id="cart-size-${html(p.key)}" data-cart-size="${html(key)}">${p.sizes.map(z=>`<option value="${html(z)}" ${z===size?'selected':''}>${html(z)}</option>`).join('')}</select>`:p.category==='curtains'?'':html(size)}${p.category==='curtains'?'':' · '}${html(p.color)}</div><div class="price">${itemPriceText(p,key,qty)}</div>${offerControl(p,key)}<div class="quantity-row"><button data-action="plus" data-key="${html(key)}" aria-label="הוספת יחידה">+</button><span>${qty}</span><button data-action="minus" data-key="${html(key)}" aria-label="הפחתת יחידה">−</button><button class="remove" data-action="remove" data-key="${html(key)}">הסרה</button></div></div></div>`).join(''):'<div class="cart-empty"><span class="symbol">♡</span>הסל ריק כרגע.<br>בחרו מוצרים מהקטלוג.</div>';
+  $('cart-list').innerHTML=rows.length?rows.map(({p,size,qty,key})=>`<div class="cart-line"><button class="cart-photo-trigger" type="button" data-zoom="${html(p.key)}" title="הגדלת התמונה" aria-label="הגדלת תמונה של ${html(p.title)}"><img src="${picture(p)||'assets/placeholder.svg'}" onerror="this.onerror=null;this.src='assets/placeholder.svg'" alt=""></button><div class="cart-product-details"><div class="cart-model">דגם ${itemCaption(p)}</div><strong>${html(p.title)}</strong><div class="meta">${p.sizes.length>1?`<label class="sr-only" for="cart-size-${html(p.key)}">שינוי מידה</label><select class="cart-size-select" id="cart-size-${html(p.key)}" data-cart-size="${html(key)}">${p.sizes.map(z=>`<option value="${html(z)}" ${z===size?'selected':''}>${html(z)}</option>`).join('')}</select>`:p.category==='curtains'?'':html(size)}${p.category==='curtains'?'':' · '}${html(p.color)}</div><div class="price">${itemPriceText(p,key,qty)}</div>${offerControl(p,key)}<div class="quantity-row"><button data-action="plus" data-key="${html(key)}" aria-label="הוספת יחידה">+</button><span>${qty}</span><button data-action="minus" data-key="${html(key)}" aria-label="הפחתת יחידה">−</button><button class="remove" data-action="remove" data-key="${html(key)}">הסרה</button></div></div></div>`).join(''):'<div class="cart-empty"><span class="symbol">♡</span>הסל ריק כרגע.<br>בחרו מוצרים מהקטלוג.</div>';
   hydrateCleanImages($('cart-list'));
   updateCartSummary();
   $('share-cart').disabled=!rows.length;$('copy-cart').disabled=!rows.length;$('whatsapp-share').disabled=!rows.length;
