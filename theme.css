@@ -134,3 +134,23 @@ html[data-theme="dark"] .home-nav-button:hover{background:#4b3944}
   .wordmark img{max-height:58px}
 }
 @media(prefers-reduced-motion:reduce){.home-nav-button{transition:none}}
+
+/* Instagram shortcut next to the cart, matching the DVIR DESIGNS header. */
+.instagram-nav-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;min-width:44px;padding:9px;border:1px solid #bc9993;border-radius:11px;background:#ffffff55;color:#382e2d;transition:background-color .2s,border-color .2s,color .2s}
+.instagram-nav-button svg{display:block;width:21px;height:21px;flex:none}
+.instagram-nav-button:hover{background:#fff8f5}
+.instagram-nav-button:focus-visible{outline:3px solid #a87974;outline-offset:3px}
+html[data-theme="dark"] .instagram-nav-button{background:#3a3037;color:#f7eff0;border-color:#8c717c}
+html[data-theme="dark"] .instagram-nav-button:hover{background:#4b3944}
+@media(max-width:700px){
+  .site-header .nav-left{gap:4px}
+  .instagram-nav-button{width:42px;height:42px;min-width:42px;padding:9px;border-radius:10px}
+  .instagram-nav-button svg{width:20px;height:20px}
+}
+@media(max-width:355px){
+  .site-header .nav-left{gap:2px}
+  .basket-trigger{min-width:42px;width:42px;min-height:42px;padding:6px}
+  .instagram-nav-button{min-width:38px;width:38px;height:42px;padding:7px}
+  .instagram-nav-button svg{width:19px;height:19px}
+}
+@media(prefers-reduced-motion:reduce){.instagram-nav-button{transition:none}}
