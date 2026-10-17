@@ -30,6 +30,7 @@ test('Phone layout, share review and customer name', async ({ page }) => {
   await page.locator('#customer-name').fill('לקוחה לדוגמה');
   await page.locator('#whatsapp-share').click();
   await expect(page.locator('#share-preview-dialog')).toBeVisible();
+  await expect(page.locator('#share-preview-send')).toBeVisible();
   await expect(page.locator('#share-preview-text')).toContainText('לקוחה לדוגמה');
   await page.locator('#share-preview-back').click();
   await page.screenshot({ path: 'test-results/mobile-cart.png', fullPage: false });
